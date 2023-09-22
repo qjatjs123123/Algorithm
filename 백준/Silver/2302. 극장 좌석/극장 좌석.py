@@ -20,7 +20,7 @@ for test_case in range(1):
 
     max_num = max(dp)
 
-    tmp = [0 for i in range(max_num + 5)]
+    tmp = [0 for i in range(max_num + 2)]
     tmp[0] = 1
     tmp[1] = 1
     for i in range(2, max_num+1):
