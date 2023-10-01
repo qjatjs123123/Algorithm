@@ -1,17 +1,29 @@
+
 import sys
+
+# t = int(sys.stdin.readline())
+input = sys.stdin.readline
 for test_case in range(1):
     n, s, m = map(int, sys.stdin.readline().split())
     arr = list(map(int, sys.stdin.readline().split()))
-    dp = [set()] + [set() for _ in range(n)]
-    dp[0].add(s)
+    dp = {}
+    ans = -1
+    def dfs(l, total):
+        global ans
+        if (l, total) in dp:
+            return dp[(l, total)]
+        if l == len(arr):
+            ans = max(ans, total)
+            return 0
+        n1, n2 = -1, -1
+        if total + arr[l] <= m:
+            n1 = dfs(l+1, total + arr[l])
 
-    for i in range(1, n + 1):
-        for prev in dp[i-1]:
-            if prev + arr[i-1] <= m:
-                dp[i].add(prev+arr[i-1])
-            if prev - arr[i-1] >= 0:
-                dp[i].add(prev-arr[i-1])
-    if not dp[n]:
-        print(-1)
-    else:
-        print(max(dp[n]))
+        if total - arr[l] >= 0:
+            n2 = dfs(l+1, total - arr[l])
+
+        dp[(l, total)] = max(n1,n2)
+        return dp[(l, total)]
+
+    dfs(0, s)
+    print(ans)
