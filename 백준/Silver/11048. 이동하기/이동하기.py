@@ -7,21 +7,15 @@ for test_case in range(1):
     for _ in range(n):
         graph.append(list(map(int, sys.stdin.readline().split())))
 
-    dp = {}
-    direction = [[1, 0], [0, 1]]
-    def dfs(row, col):
+    dp = [[0 for _ in range(m + 1)] for _ in range(n + 1)]
+    dp[1][1] = graph[0][0]
 
-        if (row, col) in dp:
-            return dp[(row, col)]
+    for row in range(1, n + 1):
+        for col in range(1, m + 1):
 
-        num = 0
-        for direct in direction:
-            new_row, new_col = row + direct[0], col + direct[1]
+            dp[row][col] = max(
+                               graph[row-1][col-1] + dp[row - 1][col],
+                               graph[row-1][col-1] + dp[row - 1][col - 1],
+                                graph[row - 1][col - 1] + dp[row][col - 1])
 
-            if 0 <= new_row < n and 0 <= new_col < m:
-                num = max(num, dfs(new_row, new_col) + graph[new_row][new_col])
-
-        dp[(row, col)] = num
-        return num
-
-    print(dfs(0, 0) + graph[0][0])
+    print(dp[-1][-1])
