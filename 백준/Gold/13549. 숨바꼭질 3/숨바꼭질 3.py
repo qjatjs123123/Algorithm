@@ -4,7 +4,7 @@ from collections import deque
 for test_case in range(1):
     n, k = map(int, sys.stdin.readline().split())
 
-    dp = [float("inf") for i in range(1000001)]
+    dp = [float("inf") for i in range(100001)]
 
     q = deque()
 
@@ -22,6 +22,6 @@ for test_case in range(1):
             break
 
         for new_pos, time in cases:
-            if 0 <= new_pos <= 1000000 and dp[new_pos] > cur_cnt + time:
+            if 0 <= new_pos <= 100000 and dp[new_pos] > cur_cnt + time:
                 dp[new_pos] = cur_cnt + time
                 q.append((new_pos, cur_cnt + time))
