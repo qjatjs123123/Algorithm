@@ -1,5 +1,4 @@
 import sys
-sys.setrecursionlimit(10**6)
 
 for test_case in range(1):
     n = int(sys.stdin.readline())
@@ -7,33 +6,20 @@ for test_case in range(1):
 
     #방향 0 => 오른쪽 1 => 아래쪽, 2=> 대각선
 
-    direction = [[0, 2], [1, 2], [0, 1, 2]]
-    move = [[0, 1], [1, 0], [1, 1]]
-    blank = [[(0, 1)], [(1, 0)], [(0, 1), (1, 0), (1, 1)]]
-    dp = {}
-    def dfs(cur_row, cur_col, cur_direct):
-        if (cur_row, cur_col, cur_direct) in dp:
-            return dp[(cur_row, cur_col, cur_direct)]
-        if cur_row == n - 1 and cur_col == n-1:
-            return 1
-        ans = 0
-        for new_direct in direction[cur_direct]:
-            new_row, new_col = cur_row + move[new_direct][0], cur_col + move[new_direct][1]
 
-            flg = True
-            for r, c in blank[new_direct]:
-                check_row, check_col = cur_row + r, cur_col + c
-
-                if 0 <= check_row < n and 0 <= check_col < n and graph[check_row][check_col] == 0:
-                    continue
-                flg = False
-                break
-
-            if flg:
-                ans += dfs(new_row, new_col, new_direct)
-
-        dp[(cur_row, cur_col, cur_direct)] = ans
-        return ans
+    dp = [[[0 for _ in range(n)] for _ in range(n)] for i in range(3)]
+    dp[0][0][1] = 1 # 처음 위치 초기화
+    for j in range(2, n):
+        if graph[0][j] == 0:
+            dp[0][0][j] = dp[0][0][j-1]
 
 
-    print(dfs(0, 1, 0))
+    for i in range(1, n):
+        for j in range(1, n):
+            if graph[i][j] == 0 and graph[i - 1][j] == 0 and graph[i][j - 1] == 0:
+                dp[2][i][j] = dp[0][i - 1][j - 1] + dp[1][i - 1][j - 1] + dp[2][i - 1][j - 1]
+            if graph[i][j] == 0:
+                dp[0][i][j] = dp[0][i][j - 1] + dp[2][i][j - 1]  # 가로
+                dp[1][i][j] = dp[1][i - 1][j] + dp[2][i - 1][j]  # 세로
+
+    print(sum([dp[i][n - 1][n - 1] for i in range(3)]))
