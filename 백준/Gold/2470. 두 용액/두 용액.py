@@ -1,29 +1,29 @@
 import sys
-from bisect import bisect_left,bisect_right
+
 for test_case in range(1):
     n = int(sys.stdin.readline())
     arr = list(map(int, sys.stdin.readline().split()))
     arr.sort()
 
-    min_total = float('inf')
-    result = []
-    for i in range(n):
-        num = arr[i]
-        idx = bisect_left(arr, num*-1)
+    start = 0
+    end = n - 1
+    ans = float('inf')
+    tmp = []
+    while start < end:
+        cur = arr[start] + arr[end]
 
-        cases = [idx, idx + 1, idx - 1]
-        min_num = float('inf')
-        tmp = -1
-        for case in cases:
-            if 0 <= case < n:
-                if min_num > abs(num + arr[case]):
-                    min_num = abs(num + arr[case])
-                    tmp = case
-        if i == tmp:
-            continue
-        if min_total > min_num:
-            min_total = min_num
-            result = [num, arr[tmp]]
+        if ans > abs(cur):
+            ans = abs(cur)
+            tmp = [arr[start], arr[end]]
 
-    result.sort()
-    print(' '.join(map(str, result)))
+        if cur == 0:
+            break
+
+        if cur > 0:
+            end -= 1
+        else:
+            start += 1
+
+    tmp.sort()
+
+    print(' '.join(map(str, tmp)))
