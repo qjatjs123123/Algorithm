@@ -1,6 +1,7 @@
 import sys
 sys.setrecursionlimit(10**6)
 
+ans = False
 def solution():
     n, m = map(int, sys.stdin.readline().split())
     g = [[] for _ in range(n)]
@@ -9,34 +10,34 @@ def solution():
         g[a].append(b)
         g[b].append(a)
 
-    ans = False
-    visited = [False for _ in range(n + 1)]
 
+
+    visited = [False for _ in range(n + 1)]
+    global ans
     def dfs(cur_node, cnt):
         nonlocal visited
+        global ans
+        if ans:
+            return
         if cnt == 4:
-            return 0
-        ans = 0
+            ans = True
+            return
         for new_node in g[cur_node]:
             if not visited[new_node]:
-
                 visited[new_node] = True
-                ans = max(dfs(new_node, cnt + 1)+1, ans)
+                dfs(new_node, cnt + 1)
                 visited[new_node] = False
 
-        return ans
     for i in range(n):
         visited[i] = True
-        if dfs(i, 0) == 4:
-            ans = True
+        dfs(i, 0)
+        if ans:
             break
         visited[i] = False
-
 
     if ans:
         print(1)
     else:
         print(0)
-
 
 solution()
