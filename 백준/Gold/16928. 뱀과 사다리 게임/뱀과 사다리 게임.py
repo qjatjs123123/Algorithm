@@ -1,4 +1,5 @@
 import sys
+
 from collections import deque
 
 
@@ -20,10 +21,12 @@ for test_case in range(1):
 
     while q:
         cur_pos, cur_cnt = q.popleft()
+        if cur_pos == 100:
+            print(cur_cnt)
+            break
         for i in range(1, 7):
             if cur_pos + i > 100:
                 continue
-
             new_pos = cur_pos + i
             while True:
                 if new_pos not in bridge:
@@ -33,5 +36,3 @@ for test_case in range(1):
             if graph[new_pos] >= cur_cnt + 1:
                 graph[new_pos] = cur_cnt + 1
                 q.append((new_pos, cur_cnt + 1))
-
-    print(graph[100])
