@@ -33,6 +33,6 @@ for test_case in range(1):
                     break
                 new_pos = bridge[new_pos]
 
-            if graph[new_pos] >= cur_cnt + 1:
+            if graph[new_pos] == float('inf'):
                 graph[new_pos] = cur_cnt + 1
                 q.append((new_pos, cur_cnt + 1))
