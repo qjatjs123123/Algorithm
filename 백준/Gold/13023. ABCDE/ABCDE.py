@@ -1,7 +1,6 @@
 import sys
 sys.setrecursionlimit(10**6)
 
-ans = False
 def solution():
     n, m = map(int, sys.stdin.readline().split())
     g = [[] for _ in range(n)]
@@ -10,13 +9,12 @@ def solution():
         g[a].append(b)
         g[b].append(a)
 
-
-
+    ans = False
     visited = [False for _ in range(n + 1)]
-    global ans
+
     def dfs(cur_node, cnt):
         nonlocal visited
-        global ans
+        nonlocal ans
         if ans:
             return
         if cnt == 4:
@@ -35,9 +33,10 @@ def solution():
             break
         visited[i] = False
 
+
     if ans:
         print(1)
     else:
         print(0)
-
 solution()
+        
