@@ -35,7 +35,7 @@ def solution():
                 dfs(cur_a - new_b, cur_b + new_b, cur_c)
             if new_c != 0:
                 dfs(cur_a - new_c, cur_b, cur_c + new_c)
-        visited[cur_c][cur_b][cur_a] = False
+
 
 
     dfs(0, 0, c)
