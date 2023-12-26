@@ -1,21 +1,24 @@
 import sys
+sys.setrecursionlimit(10**6)
 
-for test_case in range(1):
+def solution():
     n = int(sys.stdin.readline())
-    ans = [[' ' for i in range(n)] for j in range(n)]
+    graph = [[' ' for _ in range(n)] for _ in range(n)]
 
-    def recursion(startRow, startCol, endRow, endCol, l):
-        if l == 1:
+    def draw(start_row, start_col, end_row, end_col):
+        if end_row - start_row == 1:
+            graph[start_row][start_col] = '*'
             return
+        length = (end_row - start_row) // 3
+        total = 0
+        for row in range(start_row, end_row, length):
+            for col in range(start_col, end_col, length):
+                total += 1
+                if total == 5:
+                    continue
+                draw(row, col, row+length, col + length)
+    draw(0, 0, n, n)
 
-        cnt = 0
-        for row in range(startRow, endRow, l // 3):
-            for col in range(startCol, endCol, l // 3):
-                if cnt != 4:
-                    ans[row][col] = '*'
-                    recursion(row, col, row + l // 3, col + l // 3, l//3)
-                cnt += 1
-
-    recursion(0,0, n, n, n)
-    for i in ans:
-        print(''.join(i))
+    for r in graph:
+        print(''.join(r))
+solution()
