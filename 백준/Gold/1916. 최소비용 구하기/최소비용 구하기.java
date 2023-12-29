@@ -6,33 +6,34 @@ public class Main
 	static HashMap<Integer, ArrayList<int[]>> graph = new HashMap<>();
 	public static void main(String args[]) throws Exception
 	{
-//		BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));	
 		
 		int n = Integer.parseInt(br.readLine());
 		int m = Integer.parseInt(br.readLine());
 		
 		for (int i = 0; i < m; i++) {
-			String[] tmp = br.readLine().split(" ");
-			int start = Integer.parseInt(tmp[0]);
-			int end = Integer.parseInt(tmp[1]);
-			int value = Integer.parseInt(tmp[2]);
+			String[] str = br.readLine().split(" ");
+			int start = Integer.parseInt(str[0]);
+			int end = Integer.parseInt(str[1]);
+			int value = Integer.parseInt(str[2]);
 			int[] node = {value, end};
 			
-			if (graph.containsKey(start)) {		
+			if (graph.containsKey(start)) {
 				graph.get(start).add(node);
-			}else {
+			} else {
+
 				ArrayList<int[]> arraylist = new ArrayList<>();
 				arraylist.add(node);
 				graph.put(start, arraylist);
-			}
+			}			
 		}
+		String[] str = br.readLine().split(" ");
+		int start = Integer.parseInt(str[0]);
+		int end = Integer.parseInt(str[1]);
 		
-		String[] tmp = br.readLine().split(" ");
-		int start = Integer.parseInt(tmp[0]);
-		int end = Integer.parseInt(tmp[1]);
-		int ans = dijkstra(n, start, end);
-		System.out.println(ans);
+		System.out.println(dijkstra(n, start, end));
+			
     }
 	
 	static int dijkstra(int n, int start, int end) {
@@ -46,32 +47,29 @@ public class Main
 		PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
 		int[] first = {0, start};
 		pq.add(first);
-		visited[start] = true;
-		
 		while (!pq.isEmpty()) {
-			int[] tmp = pq.poll();
-			int val = tmp[0];
-			int s = tmp[1];
-			visited[s] = true;
-			if (!graph.containsKey(s)) continue;
-			if (val > distance[s]) continue;
 			
-			ArrayList<int[]> arraylist = new ArrayList<>();
-			arraylist = graph.get(s);
+			int[] cur_arr = pq.poll();
+			int cur_dist = cur_arr[0];
+			int cur_node = cur_arr[1];
 			
-			for (int[] new_node : arraylist) {
-				int new_val = new_node[0];
-				int new_start = new_node[1];
+			if (!graph.containsKey(cur_node)) continue;
+			if (visited[cur_node]) continue;
+			
+			visited[cur_node] = true;
+			ArrayList<int[]> arraylist = graph.get(cur_node);
+			for (int[] new_arr : arraylist) {
+				int new_dist = new_arr[0];
+				int new_node = new_arr[1];
+				int[] tmp = {cur_dist + new_dist, new_node};
 				
-				if (distance[new_start] > val + new_val) {
-					distance[new_start] = val + new_val;
-					int[] node = {val + new_val, new_start};
-					pq.add(node);
+				if (distance[new_node] > cur_dist + new_dist) {
+					distance[new_node] = cur_dist + new_dist;
+					pq.add(tmp);
 				}
 			}
 		}
 		return distance[end];
 	}
-
 	
 }
