@@ -16,7 +16,7 @@ public class Main
 			String tmp = br.readLine().replace("[", "").replace("]", "");	
 			String[] arr = tmp.split(",");
 			
-			Deque<String> q = new ArrayDeque<>(Arrays.asList(arr));
+			Deque<String> q = new LinkedList<>(Arrays.asList(arr));
 			boolean isReverse = false;
 			boolean flg = true;
 			if(tmp.equals("")) q.remove();
