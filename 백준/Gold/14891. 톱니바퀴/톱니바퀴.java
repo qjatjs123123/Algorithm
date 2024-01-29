@@ -1,95 +1,90 @@
-
 import java.util.*;
 import java.util.stream.Collectors;
 import java.io.*;
 
 public class Main
-{
-	public static void main(String args[]) throws Exception
-	{
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));	
-			
-		ArrayList<Deque<Integer>> q = new ArrayList<>();
+{	
+	static Deque[] wheel = new Deque[5];
+	public static void main(String[] args) throws Exception {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
-		for (int i = 0; i < 4; i++) {
+		for (int i = 1; i <= 4; i++) {
+			int[] list = Arrays.stream(br.readLine().split("")).mapToInt(Integer::parseInt).toArray();
 			Deque<Integer> tmp = new LinkedList<>();
-			int[] t1 = Arrays.stream(br.readLine().split("")).mapToInt(Integer::parseInt).toArray();
-			for (Integer t : t1) tmp.add(t);
-			q.add(tmp);
+			
+			for (int num : list) tmp.addLast(num);
+			wheel[i] = tmp;
 		}
 		
-		int cnt = Integer.parseInt(br.readLine());
+		int k = Integer.parseInt(br.readLine());
 		
-		for (int i = 0; i < cnt; i++) {
-			String[] tmp = br.readLine().split(" ");
-			int num = Integer.parseInt(tmp[0]) - 1;
-			int direct = Integer.parseInt(tmp[1]);
+		for (int i = 0; i < k; i++) {
+			int[] list = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+			int idx = list[0];
+			int direct = list[1];
 			
-			ArrayList<int[]> left = new ArrayList<>();
-			ArrayList<int[]> right = new ArrayList<>();
-			
-			int[] t1 = {num, direct};
-			left.add(t1);
-			
-			int cur_idx = num;
-			int cur_direct = direct;
-			for (int new_idx = num - 1; new_idx >= 0; new_idx--) {
-				Deque<Integer> cur_left = q.get(new_idx);
-				Deque<Integer> cur_right = q.get(cur_idx);
+			Deque<int[]> queue = new LinkedList<>();
+			int[] tmp = {idx, direct};
+			queue.add(tmp);
+			int new_direct = direct;
+			//left
+			for (int l = idx; l > 1; l--) {
+				int cur_left = getNum(true, wheel[l]);
+				int new_right = getNum(false, wheel[l - 1]);
 				
-				if (getIndex(cur_left, 2) == getIndex(cur_right, 6)) break;
-				cur_direct *= -1;
-				int[] t = {new_idx, cur_direct};
-				left.add(t);
-				cur_idx = new_idx;
+				if (cur_left == new_right) break;
+				
+				new_direct *= -1;
+				int[] arr = {l - 1, new_direct};
+				queue.add(arr);
 			}
 			
-			cur_idx = num;	
-			cur_direct = direct;
-			for (int new_idx = num + 1; new_idx < 4; new_idx++) {
-				Deque<Integer> cur_left = q.get(cur_idx);
-				Deque<Integer> cur_right = q.get(new_idx);
+			new_direct = direct;
+			//right
+			for (int r = idx; r < 4; r++) {
+				int cur_right = getNum(false, wheel[r]);
+				int new_left = getNum(true, wheel[r + 1]);
 				
-				if (getIndex(cur_left, 2) == getIndex(cur_right, 6)) break;
-				cur_direct *= -1;
-				int[] t = {new_idx, cur_direct};
-				left.add(t);
-				cur_idx = new_idx;
+				if (cur_right == new_left) break;
+				
+				new_direct *= -1;
+				int[] arr = {r+1, new_direct};
+				queue.add(arr);
 			}
 			
-			for (int j = 0; j < left.size(); j++) {
-				int[] t = left.get(j);
-				int idx = t[0];
-				int n_direct = t[1];
+			//rotate
+			while (!queue.isEmpty()) {
+				int[] arr = queue.pollFirst();
+				int cur_direct = arr[1];
+				Deque cur_deque = wheel[arr[0]];
 				
-				if (n_direct == 1) q.get(idx).addFirst(q.get(idx).pollLast());
-				else q.get(idx).addLast(q.get(idx).pollFirst());
-			}			
-		}	
-		System.out.println(getAnswer(q));
-    }
-	
-	static int getAnswer(ArrayList<Deque<Integer>> q) {
+				if (cur_direct == 1) {
+					cur_deque.addFirst(cur_deque.pollLast());
+				}else {
+					cur_deque.addLast(cur_deque.pollFirst());
+				}
+				
+			}
+			
+		}
 		int ans = 0;
-		for (int i = 0; i < 4 ; i++ ) {
-			if (q.get(i).getFirst() == 1) ans += Math.pow(2, i);
+		for (int j = 1; j <= 4; j++) {
+			Deque<Integer> deque = wheel[j];
+			
+			if (deque.pollFirst() == 1) ans += Math.pow(2, j-1);
 		}
-		return ans;
+		System.out.println(ans);
 	}
 	
-	static int getIndex(Deque<Integer> q, int idx) {
-		Iterator<Integer> it = q.iterator();
-		int cnt = 0;
-		int ans = 0;
-		while (it.hasNext()) {
-			int t = it.next();
-			if (cnt == idx) {
-				ans = t;
-				break;
-			}
-			cnt++;
+	static int getNum(boolean isLeft, Deque<Integer> deque) {
+		
+		int point = isLeft ? 6 : 2;
+		int idx = 0;
+		
+		for (Integer num : deque) {
+			if (idx == point) return num;
+			idx++;
 		}
-		return ans;
+		return -1;
 	}
 }
