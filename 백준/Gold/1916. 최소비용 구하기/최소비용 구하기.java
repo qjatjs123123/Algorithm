@@ -1,75 +1,75 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 public class Main
 {
-	static HashMap<Integer, ArrayList<int[]>> graph = new HashMap<>();
-	public static void main(String args[]) throws Exception
-	{
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));	
-		
-		int n = Integer.parseInt(br.readLine());
-		int m = Integer.parseInt(br.readLine());
-		
-		for (int i = 0; i < m; i++) {
-			String[] str = br.readLine().split(" ");
-			int start = Integer.parseInt(str[0]);
-			int end = Integer.parseInt(str[1]);
-			int value = Integer.parseInt(str[2]);
-			int[] node = {value, end};
-			
-			if (graph.containsKey(start)) {
-				graph.get(start).add(node);
-			} else {
-
-				ArrayList<int[]> arraylist = new ArrayList<>();
-				arraylist.add(node);
+	static int N, M;
+	static HashMap<Integer, ArrayList<int[]>> graph;
+    public static void main(String[] args) throws IOException
+    {
+ //       BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        M = Integer.parseInt(st.nextToken());
+        
+        graph = new HashMap<>();
+        
+        for (int i = 0; i < M; i++) {
+        	st = new StringTokenizer(br.readLine());
+        	int start = Integer.parseInt(st.nextToken());
+        	int end = Integer.parseInt(st.nextToken());
+        	int value = Integer.parseInt(st.nextToken());
+        	
+        	if (graph.containsKey(start)) {
+        		ArrayList<int[]> arraylist = graph.get(start);
+        		arraylist.add(new int[] {end, value});
+        		graph.put(start, arraylist);
+        	} else {
+        		ArrayList<int[]> arraylist = new ArrayList<>();
+				arraylist.add(new int[] {end, value});
 				graph.put(start, arraylist);
-			}			
-		}
-		String[] str = br.readLine().split(" ");
-		int start = Integer.parseInt(str[0]);
-		int end = Integer.parseInt(str[1]);
+        	}
+        }
+        
+        st = new StringTokenizer(br.readLine());
+        int start = Integer.parseInt(st.nextToken());
+		int end = Integer.parseInt(st.nextToken());
 		
-		System.out.println(dijkstra(n, start, end));
-			
+		System.out.println(dijkstra(N, start, end));
     }
-	
-	static int dijkstra(int n, int start, int end) {
-		int[] distance = new int[n + 1];
-		boolean[] visited = new boolean[n + 1];
-		for (int i = 0; i < n + 1; i++) {
-			distance[i] = Integer.MAX_VALUE;
-			visited[i] = false;
-		}
-		
-		PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
-		int[] first = {0, start};
-		pq.add(first);
-		while (!pq.isEmpty()) {
-			
-			int[] cur_arr = pq.poll();
-			int cur_dist = cur_arr[0];
-			int cur_node = cur_arr[1];
-			
-			if (!graph.containsKey(cur_node)) continue;
-			if (visited[cur_node]) continue;
-			
-			visited[cur_node] = true;
-			ArrayList<int[]> arraylist = graph.get(cur_node);
-			for (int[] new_arr : arraylist) {
-				int new_dist = new_arr[0];
-				int new_node = new_arr[1];
-				int[] tmp = {cur_dist + new_dist, new_node};
-				
-				if (distance[new_node] > cur_dist + new_dist) {
-					distance[new_node] = cur_dist + new_dist;
-					pq.add(tmp);
-				}
-			}
-		}
-		return distance[end];
-	}
-	
+    
+    static int dijkstra(int n, int start, int end) {
+    	int[] distance = new int[n + 1];
+    	boolean[] visited = new boolean[n + 1];
+    	
+    	for (int i = 0; i < n + 1; i++) {
+    		distance[i] = Integer.MAX_VALUE;
+    	}
+    	
+    	PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+    	pq.add(new int[] {0, start});
+    	visited[start] = true;
+    	
+    	while (!pq.isEmpty()) {
+    		int[] tmp = pq.poll();
+    		int val = tmp[0];
+    		int s = tmp[1];
+    		
+    		if (!graph.containsKey(s) || val > distance[s]) continue;
+    		
+    		for (int[] new_node : graph.get(s)) {
+    			int new_s = new_node[0];
+    			int new_val = new_node[1];
+    			
+    			if (new_val + val < distance[new_s]) {
+    				distance[new_s] = new_val + val;
+    				pq.add(new int[] {new_val + val, new_s});
+    			}
+    		}
+    	}
+    	
+    	return distance[end];
+    }
 }
