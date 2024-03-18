@@ -1,51 +1,49 @@
 import java.io.*;
 import java.util.*;
 
-public class Main {
-	private static StringBuilder sb = new StringBuilder();
-	static int n;
-	static int m;
-	static int[] num;
-	public static void main(String[] args) throws Exception{
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		n = Integer.parseInt(st.nextToken());
-		m = Integer.parseInt(st.nextToken());
-		
-		num = new int[n];
-		for (int i = 0; i<n; i++) {
-			st = new StringTokenizer(br.readLine());
-			num[i] = Integer.parseInt(st.nextToken());
-		}
-		Arrays.sort(num);
-		int ans = Integer.MAX_VALUE;
-		for (int i = 0; i < n; i++) {
-			int target = num[i] - m;
-			int idx = binary_search(target);
-			
-			int[] cases = new int[] {idx-1, idx, idx+1};
-			
-			for (int j: cases) {
-				if (j < 0 || j >= n) continue;
-				
-				int gap = num[i] - num[j];
-				if (gap >= m) ans = Math.min(ans, gap);
-			}
-		}
-		System.out.println(ans);
-	}
-	static int binary_search(int target) {
-		int start = 0;
-		int end = n - 1;
-		
-		while (start <= end) {
-			int mid = (start + end) / 2;
-			
-			if (target >= num[mid]) start = mid + 1;
-			else end = mid - 1;
-		}
-		return start;
-	}
+public class Main
+{
+    public static void main(String[] args) throws IOException
+    {
+//      BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        
+        int N, M;
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        
+        int[] arr = new int[N];
+        for (int i = 0; i < N; i++) {
+        	st = new StringTokenizer(br.readLine());
+        	arr[i] = Integer.parseInt(st.nextToken());
+        }
+        
+        Arrays.sort(arr);
+        
+        int left = 0;
+        long total = Long.MAX_VALUE;
+        
+        for (int right = 0; right < N; right++) {
+        	int diff = arr[right] - arr[left];
+        	
+        	if (diff == M) {
+        		total = M;
+        		break;
+        	}
+        	if (diff > M) {
+        		total = Math.min(total, diff);
+        		while (true) {
+        			left++;
+        			diff = arr[right] - arr[left];
+        			if (diff < M) break;
+        			total = Math.min(total, diff);
+        		}
+        	}
+
+        }
+        
+        System.out.println(total);
+    }
+    
 }
