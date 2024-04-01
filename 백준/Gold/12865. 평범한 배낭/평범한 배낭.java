@@ -1,8 +1,6 @@
 import java.io.*;
 import java.util.*;
 
-
-
 public class Main {
 	static int N, K;
 
@@ -25,23 +23,21 @@ public class Main {
 		
 		Collections.sort(list, (a, b) -> a[0] - b[0]);
 		
-		int[][] dp = new int[N + 1][K + 1];
+		int[] dp = new int[K + 1];
 		
-		for (int row = 1; row <= N; row++) {
-			int[] arr = list.get(row - 1);
+		for (int row = 0; row < N; row++) {
+			int[] arr = list.get(row);
 			int cur_weight = arr[0];
 			int cur_value = arr[1];
 			
-			for (int col = 0; col <= K; col++) {
-				if (cur_weight > col) {
-					dp[row][col] = dp[row - 1][col];
-					continue;
-				}
+			for (int col = K; col >= 0; col--) {
+				if (col - cur_weight < 0) continue;
 				
-				dp[row][col] = Math.max(dp[row - 1][col], dp[row - 1][col - cur_weight] + cur_value);
+				dp[col] = Math.max(dp[col], dp[col - cur_weight] + cur_value);
 			}
 		}
 		
-		System.out.println(dp[N][K]);
+
+		System.out.println(dp[K]);
 	}
 } // end of class
