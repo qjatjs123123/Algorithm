@@ -1,75 +1,71 @@
 import java.io.*;
 import java.util.*;
 
-public class Main
-{
-	static int N, M;
-	static HashMap<Integer, ArrayList<int[]>> graph;
-    public static void main(String[] args) throws IOException
-    {
- //       BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+public class Main {
+    static int N, M;
+    static HashMap<Integer, ArrayList<int[]>> graph = new HashMap<>();
+    
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//    	BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
         StringTokenizer st = new StringTokenizer(br.readLine());
+        
         N = Integer.parseInt(st.nextToken());
         st = new StringTokenizer(br.readLine());
         M = Integer.parseInt(st.nextToken());
         
-        graph = new HashMap<>();
-        
         for (int i = 0; i < M; i++) {
         	st = new StringTokenizer(br.readLine());
-        	int start = Integer.parseInt(st.nextToken());
-        	int end = Integer.parseInt(st.nextToken());
-        	int value = Integer.parseInt(st.nextToken());
+        	int from = Integer.parseInt(st.nextToken());
+        	int to = Integer.parseInt(st.nextToken());
+        	int dist = Integer.parseInt(st.nextToken());
         	
-        	if (graph.containsKey(start)) {
-        		ArrayList<int[]> arraylist = graph.get(start);
-        		arraylist.add(new int[] {end, value});
-        		graph.put(start, arraylist);
+        	if (graph.containsKey(from)) {
+        		ArrayList<int[]> tmp = graph.get(from);
+        		tmp.add(new int[] {to, dist});
+        		graph.put(from, tmp);
         	} else {
-        		ArrayList<int[]> arraylist = new ArrayList<>();
-				arraylist.add(new int[] {end, value});
-				graph.put(start, arraylist);
-        	}
+        		ArrayList<int[]> tmp = new ArrayList<>();
+        		tmp.add(new int[] {to, dist});
+        		graph.put(from, tmp);
+        	} 	
         }
-        
         st = new StringTokenizer(br.readLine());
-        int start = Integer.parseInt(st.nextToken());
-		int end = Integer.parseInt(st.nextToken());
-		
-		System.out.println(dijkstra(N, start, end));
-    }
+        
+        int from = Integer.parseInt(st.nextToken());
+        int to = Integer.parseInt(st.nextToken());
+        
+        System.out.println(dijkstra(from, to));
+    }  
     
-    static int dijkstra(int n, int start, int end) {
-    	int[] distance = new int[n + 1];
-    	boolean[] visited = new boolean[n + 1];
+    static int dijkstra(int from, int to) {
+    	int[] distance = new int[N + 1];
     	
-    	for (int i = 0; i < n + 1; i++) {
-    		distance[i] = Integer.MAX_VALUE;
-    	}
-    	
+    	for (int i = 0; i <= N; i++) distance[i] = Integer.MAX_VALUE;
+    	distance[from] = 0;
     	PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
-    	pq.add(new int[] {0, start});
-    	visited[start] = true;
+    	pq.add(new int[] {0, from});
     	
     	while (!pq.isEmpty()) {
     		int[] tmp = pq.poll();
-    		int val = tmp[0];
-    		int s = tmp[1];
+    		int cur_dist = tmp[0];
+    		int cur_node = tmp[1];
     		
-    		if (!graph.containsKey(s) || val > distance[s]) continue;
+    		if (distance[cur_node] < cur_dist) continue;
+    		if (!graph.containsKey(cur_node)) continue;
+    		ArrayList<int[]> list = graph.get(cur_node);
     		
-    		for (int[] new_node : graph.get(s)) {
-    			int new_s = new_node[0];
-    			int new_val = new_node[1];
+    		for (int[] arr : list) {
+    			int new_node = arr[0];
+    			int new_dist = cur_dist + arr[1];
     			
-    			if (new_val + val < distance[new_s]) {
-    				distance[new_s] = new_val + val;
-    				pq.add(new int[] {new_val + val, new_s});
+    			if (distance[new_node] > new_dist) {
+    				distance[new_node] = new_dist;
+    				pq.add(new int[] {new_dist, new_node});
     			}
     		}
     	}
     	
-    	return distance[end];
+    	return distance[to];
     }
 }
