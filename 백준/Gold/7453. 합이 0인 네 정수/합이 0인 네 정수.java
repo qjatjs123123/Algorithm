@@ -32,8 +32,8 @@ public class Main {
 		for (int i = 0; i < n; i++) {	
 			for (int j = 0; j < n; j++) {
 				int temp = arr[i][0] + arr[j][1];
-				int l1 = upperBound(list2, -temp);
-				int l2 = lowerBound(list2, -temp);
+				int l1 = upperBound(list2, temp *  -1);
+				int l2 = lowerBound(list2, temp *  -1);
 				ans += (l1 - l2);
 			}
 
