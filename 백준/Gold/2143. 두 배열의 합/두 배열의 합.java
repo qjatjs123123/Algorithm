@@ -2,106 +2,84 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	
-	static ArrayList<Long> sumA = new ArrayList<>();
-	static ArrayList<Long> sumB = new ArrayList<>();
-	
+
 	public static void main(String[] args) throws IOException {
 		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
+		StringTokenizer st = new StringTokenizer(br.readLine());	
 		int T = Integer.parseInt(st.nextToken());
-		st = new StringTokenizer(br.readLine());
-		int n = Integer.parseInt(st.nextToken());
-		int[] arrA = new int[n];
-		st = new StringTokenizer(br.readLine());
-		for (int i = 0; i < n; i++) {
-			int num = Integer.parseInt(st.nextToken());
-			arrA[i] = num;
-		}
-		
-		st = new StringTokenizer(br.readLine());
-		int m = Integer.parseInt(st.nextToken());
-		int[] arrB = new int[m];
-		st = new StringTokenizer(br.readLine());
-		for (int i = 0; i < m; i++) {
-			int num = Integer.parseInt(st.nextToken());
-			arrB[i] = num;
-		}
 	
+		st = new StringTokenizer(br.readLine());	
+		int n = Integer.parseInt(st.nextToken());
+		
+		int[] arr1 = new int[n];
+		st = new StringTokenizer(br.readLine());	
+		for (int i = 0; i < n; i++) arr1[i] = Integer.parseInt(st.nextToken());
+		
+		st = new StringTokenizer(br.readLine());	
+		int m = Integer.parseInt(st.nextToken());
+		
+		int[] arr2 = new int[m];
+		st = new StringTokenizer(br.readLine());	
+		for (int i = 0; i < m; i++) arr2[i] = Integer.parseInt(st.nextToken());
+		
+		ArrayList<Long> list1 = new ArrayList<>();
 		for (int i = 0; i < n; i++) {
-			long total = arrA[i];
-			sumA.add(total);
-			for (int j = i + 1; j < n; j++) {
-				total += arrA[j];
-				sumA.add(total);
+			long total = 0;
+			for (int j = i; j < n; j++) {
+				total += arr1[j];
+				list1.add(total);
 			}
 		}
 		
-		HashMap<Long, Integer> counter = new HashMap<>(); 
-		
+		ArrayList<Long> list2 = new ArrayList<>();
 		for (int i = 0; i < m; i++) {
-			long total = arrB[i];
-			sumB.add(total);
-			
-			if (counter.containsKey(total)) {
-				int cnt = counter.get(total);
-				counter.put(total, cnt + 1);
-			}else {
-				counter.put(total, 1);
-			}
-			
-			for (int j = i + 1; j < m; j++) {
-				total += arrB[j];
-				sumB.add(total);
-				
-				
-				if (counter.containsKey(total)) {
-					int cnt = counter.get(total);
-					counter.put(total, cnt + 1);
-				}else {
-					counter.put(total, 1);
-				}
+			long total = 0;
+			for (int j = i; j < m; j++) {
+				total += arr2[j];
+				list2.add(total);
 			}
 		}
 		
-		Collections.sort(sumA);
-		Collections.sort(sumB);
+		Collections.sort(list2);
 		
 		long ans = 0;
-		for (Long num : sumA) {
+		for (Long num : list1) {
 			Long target = T - num;
+			int up = upperBound(target, list2);
+			int lo = lowerBound(target, list2);
 			
-			if (counter.containsKey(target)) {
-				ans += counter.get(target);
-			}
+			ans += (up - lo);
 		}
-		
 		System.out.println(ans);
 	}
 	
-	static int binary_search(Long target) {
-		int left = 0;
-		int right = sumB.size() - 1;
-		int ans = -1;
-		while (left <= right) {
-			int mid  = (left + right) / 2;
-			Long num = sumB.get(mid);
+	static int upperBound(long target, ArrayList<Long> list) {
+		int start = 0;
+		int end = list.size() - 1;
+		
+		while (start <= end) {
+			int mid = (start + end) / 2;
 			
-			if (num == target) {
-				ans = mid;
-				break;
-			}
-			if (num > target) {
-				right = mid - 1;
-			} else {
-				left = mid + 1;
-			}
+			if (target >= list.get(mid)) start = mid + 1;
+			else end = mid - 1;
 		}
 		
-		return ans;
+		return end;
+	}
+	
+	static int lowerBound(long target, ArrayList<Long> list) {
+		int start = 0;
+		int end = list.size() - 1;
+		
+		while (start <= end) {
+			int mid = (start + end) / 2;
+			
+			if (target > list.get(mid)) start = mid + 1;
+			else end = mid - 1;
+		}
+		
+		return end;
 	}
 }
-
