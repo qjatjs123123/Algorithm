@@ -23,27 +23,29 @@ public class Main {
 		int ans = Integer.MAX_VALUE;
 		int result = 0;
 		
-		int idx = 0;
-		for (int num : arr) {
-			int lo = lowerBound(-num, arr);
-			int up = upperBound(-num, arr);
-			int d = change(lo - 1, arr);
+		int left = 0;
+		int right = N - 1;
+		
+		while (left < right) {
+			int sum = arr[left] + arr[right];
 			
-			lo = change(lo, arr);
-			up = change(up, arr);
-			
-			int[] temp = {d, lo, up};
-			
-			for (int k : temp) {
-				if (k == idx) continue;
-				
-				if (ans > Math.abs(num + arr[k])) {
-					ans = Math.abs(num + arr[k]);
-					result = num + arr[k];
-				}
+			if (ans > Math.abs(sum)) {
+				ans = Math.abs(sum);
+				result = sum;
 			}
 			
-			idx++;
+			if (sum < 0) {
+				left++;
+			}
+			
+			else if (sum > 0) {
+				right--;
+			}
+			else {
+				result = 0;
+				break;
+			}
+			
 		}
 		
 		System.out.println(result);
