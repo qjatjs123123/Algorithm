@@ -2,59 +2,56 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	static StringBuilder sb = new StringBuilder();
-	static int N, M;
 	
-	public static void main(String[] args) throws Exception{
+	public static void main(String[] args) throws IOException {
+		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//		BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+		
 		StringTokenizer st = new StringTokenizer(br.readLine());
 		
-		N = Integer.parseInt(st.nextToken());
+		int N = Integer.parseInt(st.nextToken());
 		
-		int[] graph = new int[N];
-		int[] dict = new int[20001];
+		int[] arr = new int[N];
 		st = new StringTokenizer(br.readLine());
+		
 		for (int i = 0; i < N; i++) {
-			graph[i] = Integer.parseInt(st.nextToken());
-			dict[graph[i] + 10000] += 1;
+			arr[i] = Integer.parseInt(st.nextToken());
 		}
 		
-		Arrays.sort(graph);
-//		System.out.println(Arrays.toString(graph));
-		int[] use = new int[20001];
-		long total = 0;
-		for (int i = 0; i < N; i++) {
-			if (graph[i] > 0) break;
-			int target = -graph[i];
-			int start = i + 1;
-			int prev = -1;
-			int end = N - 1;
-			for (int j = 0; j < 20001; j++) use[j] = 0;
-			dict[graph[i] + 10000] -= 1;
+		Arrays.sort(arr);
+		
+		ArrayList<Integer> list = new ArrayList<>();
+		long ans = 0;
+		for (int i = 0; i < N - 2; i++) {
+			int target = arr[i];
+			
+			int left = i + 1;
+			int right = N - 1;
+			
+			while (left < right) {
+				int hap = arr[left] + arr[right];
+				int leftCount = 1;
+				int rightCount = 1;
+				if (hap == -target) {
+					while (left < right && arr[left] == arr[left + 1]) {
+						left++;
+						leftCount++;
+					}
+					
 
-			
-			while (start < end) {
-//				use[graph[start] + 10000] += 1; 
-				if (prev != start) use[graph[start] + 10000] += 1; 
-				prev = start;
-//				if (i == 3) {
-//					System.out.println(start + " " +use[2 + 10000]);
-//				}
-				int hap = graph[start] + graph[end];
-				if (hap == target) {
-					int minus = 0;
-					if (graph[start] == graph[end]) minus = use[graph[start] + 10000];
-					total += dict[graph[end] + 10000] - minus;
-					start++;
+					while(right > left && arr[right] == arr[right - 1]) {
+						right--;
+						rightCount++;
+					}
+					if (arr[left] == arr[right]) ans += (leftCount * (leftCount - 1))/2;
+
+					else ans += (leftCount * rightCount);
 				}
-				else if (hap > target) end--;
-				else start++;
+				
+				if (hap + target > 0) right--;
+				else left++;
 			}
-			
 		}
-		
-		System.out.println(total);
+		System.out.println(ans);
 	}
-	
 }
