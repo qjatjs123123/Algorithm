@@ -2,99 +2,71 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-	static ArrayList<Character> list1 = new ArrayList<>();
-	static ArrayList<Character> list2 = new ArrayList<>();
-	static Pos[][] memo;
-	static int[][] dp;
+	
 	public static void main(String[] args) throws IOException {
-//		BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		
-		String[] tmp = br.readLine().split("");
-		list1.add(' ');
-		for (String alpha : tmp) {
-			list1.add(alpha.charAt(0));
-		}
+//		StringTokenizer st = new StringTokenizer(br.readLine());
 		
-		tmp = br.readLine().split("");
-		list2.add(' ');
-		for (String alpha : tmp) {
-			list2.add(alpha.charAt(0));
-		}
+		String str1 = br.readLine();
+		String str2 = br.readLine();
 		
-		memo = new Pos[list1.size()][list2.size()];
-		for (int row = 0; row < list1.size(); row++) {
-			for (int col = 0; col < list2.size(); col++) {
-			}
-		}
+		int N1 = str1.length();
+		int N2 = str2.length();
+		int[][] dp = new int[N1 + 1][N2 + 1];
+		Pos[][] track = new Pos[N1 + 1][N2 + 1];
 		
-		dp = new int[list1.size()][list2.size()];
-		
-		for (int row = 1; row < list1.size(); row++) {
-			for (int col = 1; col < list2.size(); col++) {
-				if (list1.get(row) == list2.get(col)) {
+		for (int row = 1; row <= N1; row++) {
+			for (int col = 1; col <= N2; col++) {
+				if (str1.charAt(row - 1) == str2.charAt(col - 1)) {
 					dp[row][col] = dp[row - 1][col - 1] + 1;
-					memo[row][col] = new Pos(row - 1, col - 1);
+					track[row][col] = new Pos(row - 1, col - 1);
 					continue;
 				}
 				
-				if (dp[row - 1][col] > dp[row][col - 1]) {
-					dp[row][col] = dp[row - 1][col];
-					memo[row][col] = new Pos(row - 1, col);
-				}
-				
-				else {
+				if (dp[row][col - 1] > dp[row - 1][col]) {
 					dp[row][col] = dp[row][col - 1];
-					memo[row][col] = new Pos(row, col - 1);
+					track[row][col] = new Pos(row, col - 1);
+				} else {
+					dp[row][col] = dp[row - 1][col];
+					track[row][col] = new Pos(row - 1, col);
 				}
-
 			}
 		}
-		int ans = dp[list1.size()-1][list2.size()-1];
-		System.out.println(ans);
 		
-
-		if (ans != 0) {
-			int cur_row = list1.size() - 1;
-			int cur_col = list2.size() - 1;
-			String s = "";
-			while (true) {
-				if (cur_row == 0 || cur_col == 0) break;
-				
-				Pos pos = memo[cur_row][cur_col];
-				
-				int gap = (cur_row - pos.row) + (cur_col - pos.col);
-				
-				if (gap == 2) {
-					s += list2.get(cur_col);
-				}
-				cur_row = pos.row;
-				cur_col = pos.col;
-				
+		System.out.println(dp[N1][N2]);
+		
+		Stack<Character> stack = new Stack<>();
+		
+		int cur_row = N1;
+		int cur_col = N2;
+		
+		while (cur_row > 0 && cur_col > 0) {
+			if (str1.charAt(cur_row - 1) == str2.charAt(cur_col - 1)) {
+				stack.push(str1.charAt(cur_row - 1));
 			}
+			int new_row = track[cur_row][cur_col].row;
+			int new_col = track[cur_row][cur_col].col;
+			cur_row = new_row;
+			cur_col = new_col;
 			
-			String reverse = "";
-			for (int i = s.length() - 1; i >= 0; i--) reverse += s.charAt(i);
-			
-			System.out.println(reverse);
 		}
+		StringBuilder sb = new StringBuilder();
 		
-		
-	}
-}
+		while (!stack.isEmpty()) {
+			sb.append(stack.pop());
+		}
 
-class Pos {
-	int row, col;
-
-	public Pos(int row, int col) {
-		this.row = row;
-		this.col = col;
-	}
-
-	@Override
-	public String toString() {
-		return "Pos [row=" + row + ", col=" + col + "]";
+		System.out.println(sb.toString());
 	}
 	
+	static class Pos {
+		int row, col;
+		
+		Pos(int row, int col) {
+			this.row = row;
+			this.col = col;
+		}
+	}
 }
-
