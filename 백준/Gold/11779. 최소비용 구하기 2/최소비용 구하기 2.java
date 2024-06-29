@@ -2,87 +2,107 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    static int N, M;
-    static HashMap<Integer, ArrayList<int[]>> graph = new HashMap<>();
-    
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//    	BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        
-        N = Integer.parseInt(st.nextToken());
-        st = new StringTokenizer(br.readLine());
-        M = Integer.parseInt(st.nextToken());
-        
-        for (int i = 0; i < M; i++) {
-        	st = new StringTokenizer(br.readLine());
-        	int from = Integer.parseInt(st.nextToken());
-        	int to = Integer.parseInt(st.nextToken());
-        	int dist = Integer.parseInt(st.nextToken());
-        	
-        	if (graph.containsKey(from)) {
-        		ArrayList<int[]> tmp = graph.get(from);
-        		tmp.add(new int[] {to, dist});
-        		graph.put(from, tmp);
-        	} else {
-        		ArrayList<int[]> tmp = new ArrayList<>();
-        		tmp.add(new int[] {to, dist});
-        		graph.put(from, tmp);
-        	}
-        }
-        
-        st = new StringTokenizer(br.readLine());
-        int from = Integer.parseInt(st.nextToken());
-        int to = Integer.parseInt(st.nextToken());
-        
-        ArrayList<Integer> ans = dijkstra(from, to);
-        System.out.println(ans.get(0));
-        System.out.println(ans.size() - 2);
-        for (int i = 2; i < ans.size(); i++) System.out.print(ans.get(i) + " ");
-    }  
-    
-    static ArrayList<Integer> dijkstra(int from, int to) {
-    	int[] distance = new int[N + 1];
-    	for (int i = 0; i <= N; i++) distance[i] = Integer.MAX_VALUE;
-    	
-    	distance[from] = 0;
-    	PriorityQueue<ArrayList<Integer>> pq = new PriorityQueue<>((a, b) -> a.get(0) - b.get(0));
-    	ArrayList<Integer> arraylist = new ArrayList<>();
-    	arraylist.add(0);
-    	arraylist.add(from);
-    	arraylist.add(from);
-    	pq.add(arraylist);
-    	
-    	ArrayList<Integer> ans = new ArrayList<>();
-    	
-    	
-    	while(!pq.isEmpty()) {
-    		ArrayList<Integer> tmp = pq.poll();
-    		int cur_dist = tmp.get(0);
-    		int cur_node = tmp.get(1);
+	
+	public static void main(String[] args) throws IOException {
+		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		
+		StringTokenizer st = new StringTokenizer(br.readLine());	
+		int cityCnt = Integer.parseInt(st.nextToken());
+		
+		st = new StringTokenizer(br.readLine());
+		int busCnt = Integer.parseInt(st.nextToken());
+		
+		HashMap<Integer, ArrayList<Pos>> graph = new HashMap<>();
+		for (int i = 0; i < busCnt; i++) {
+			st = new StringTokenizer(br.readLine());
+			int start = Integer.parseInt(st.nextToken());
+			int end = Integer.parseInt(st.nextToken());
+			int dist = Integer.parseInt(st.nextToken());
+			
+			if (!graph.containsKey(start)) {
+				ArrayList<Pos> tmp = new ArrayList<>();
+				tmp.add(new Pos(end, dist));
+				graph.put(start, tmp);
+			} else {
+				ArrayList<Pos> tmp = graph.get(start);
+				tmp.add(new Pos(end, dist));
+				graph.put(start, tmp);
+			}
+		}
+		
+		st = new StringTokenizer(br.readLine());
+		int start = Integer.parseInt(st.nextToken());
+		int end = Integer.parseInt(st.nextToken());
+		
+		int[] distance = new int[cityCnt + 1];
+		ArrayList<Integer> track = new ArrayList<>();
+		
+		
+		for (int i = 0; i <= cityCnt; i++) {
+			distance[i] = Integer.MAX_VALUE;
+		}
+		distance[start] = 0;
+		
+		PriorityQueue<Pos> pq = new PriorityQueue<>();
+		ArrayList<Integer> init_track = new ArrayList<>();
+		init_track.add(start);
+		Pos init_pos = new Pos(start, 0);
+		init_pos.track = init_track;
+		pq.add(init_pos);
+		
+		while (!pq.isEmpty()) {
+			Pos cur_pos = pq.poll();
+			int cur_node = cur_pos.node;
+			int cur_dist = cur_pos.dist;
+			ArrayList<Integer> cur_track = cur_pos.track;
+			
+			if (distance[cur_node] < cur_dist) continue;
+			if (!graph.containsKey(cur_node)) continue;
+			
+			ArrayList<Pos> new_list = graph.get(cur_node);
 
-    		if (distance[cur_node] < cur_dist) continue;
-    		if (!graph.containsKey(cur_node)) continue;
-    		ArrayList<int[]> list = graph.get(cur_node);
-    		
-    		for (int[] arr : list) {
-    			int new_node = arr[0];
-    			int new_dist = cur_dist + arr[1];
-
-    			if (distance[new_node] > new_dist) {
-    				ArrayList<Integer> new_tmp = new ArrayList<>();
-    				for (int num : tmp) new_tmp.add(num);
-    				
-    				distance[new_node] = new_dist;
-    				new_tmp.set(0, new_dist);
-    				new_tmp.set(1, new_node);
-    				new_tmp.add(new_node);
-    				if (new_node == to) ans = new_tmp;
-    				pq.add(new_tmp);
-    			}
-    		}
-    	}
-
-    	return ans;
-    }
+			for (Pos pos: new_list) {
+				if (distance[pos.node] > cur_dist + pos.dist) {
+					
+					distance[pos.node] = cur_dist + pos.dist;
+					
+					ArrayList<Integer> new_track = new ArrayList<>();
+					
+					for (int num : cur_track) new_track.add(num);
+					new_track.add(pos.node);
+					Pos new_pos = new Pos(pos.node, cur_dist + pos.dist);
+					new_pos.track = new_track;
+					
+					pq.add(new_pos);
+					if (pos.node == end)
+						track = new_track;
+					
+				}
+			}
+		}
+		
+		
+		System.out.println(distance[end]);
+		System.out.println(track.size());
+		StringBuilder sb = new StringBuilder();
+		
+		for(int num : track) sb.append(num).append(" ");
+		System.out.println(sb.toString());
+	}
+	
+	static class Pos implements Comparable<Pos>{
+		int node, dist;
+		ArrayList<Integer> track = new ArrayList<>();
+		
+		Pos(int node, int dist) {
+			this.node = node;
+			this.dist = dist;
+		}
+		
+		@Override
+		public int compareTo(Pos o) {
+			return this.dist - o.dist; 
+		}
+	}
 }
