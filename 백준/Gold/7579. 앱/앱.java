@@ -1,66 +1,47 @@
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
+// The main method must be in a class named "Main".
+class Main {
+    static int N, M;
+    static int[] memory;
+    static int[] cost;
+    
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+        memory = new int[N];
+        cost = new int[N];
 
-public class Main {
-	static int N, M;
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) memory[i] = Integer.parseInt(st.nextToken());
 
-	public static void main(String[] args) throws IOException {
-//		BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
-		
-		ArrayList<int[]> list = new ArrayList<>();
-		
-		StringTokenizer st1 = new StringTokenizer(br.readLine());
-		StringTokenizer st2 = new StringTokenizer(br.readLine());
-		for (int i = 0; i < N; i++) {
-			int memory = Integer.parseInt(st1.nextToken());
-			int cost = Integer.parseInt(st2.nextToken());
-			
-			list.add(new int[] {memory, cost});
-		}
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < N; i++) cost[i] = Integer.parseInt(st.nextToken());
 
-		Collections.sort(list, (a, b) -> a[0] - b[0]);
-		
-		int total = getTotal(list);
-		
-		int[][] dp = new int[N + 1][total + 1];
-		
-		for (int row = 1; row <= N; row++ ) {
-			int[] cur_arr = list.get(row - 1);
-			int cur_memory = cur_arr[0];
-			int cur_cost = cur_arr[1];
-			boolean flg = false;
-			for (int col = 0; col <= total; col++) {
-				if (cur_cost > col) {
-					dp[row][col] = dp[row - 1][col];
-					continue;
-				}
-				
-				dp[row][col] = Math.max(dp[row - 1][col], dp[row-1][col - cur_cost] + cur_memory);
+        int[][] memo = new int[N][10001];
+        memo[0][cost[0]] = memory[0];
+        
+        for (int r = 1; r < N; r++) {
+            memo[r][cost[r]] = Math.max(memo[r][cost[r]], memory[r]);
+            for (int c = 0; c <= 10000; c++) {
+                if (memo[r-1][c] != 0) {
+                    memo[r][c] = Math.max(memo[r][c], memo[r - 1][c]);
+                    memo[r][c + cost[r]] = Math.max(memo[r][c + cost[r]], memo[r-1][c] + memory[r]);
+                }
+            }
+        }
 
-			
-			}
-		}
-		
-		for (int col = 0; col <= total; col++) {
-			if (dp[N][col] >= M) {
-				System.out.println(col);
-				break;
-			}
-		}
-		
-	}
-	
-	static int getTotal(ArrayList<int[]> arr) {
-		int total = 0;
-		
-		for (int[] num : arr) total += num[1];
-		
-		return total;
-	}
-} // end of class
+        for (int c = 0; c <= 10000; c++) {
+            if (memo[N-1][c] >= M) {
+                System.out.println(c);
+                break;
+            }
+        }
+    }
+
+}
