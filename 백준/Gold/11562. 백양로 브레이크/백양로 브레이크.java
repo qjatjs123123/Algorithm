@@ -2,13 +2,10 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 
-// The main method must be in a class named "Main".
+
 class Main {
     static int n, m;
-    static ArrayList<ArrayList<Integer>> routes = new ArrayList<>();
-    static ArrayList<ArrayList<Integer>> one_routes = new ArrayList<>();
-    static HashMap<Integer, ArrayList<Integer>> dict = new HashMap<>();
-    static int[][] ans;
+    static int[][] graph;
     
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -16,120 +13,49 @@ class Main {
 
         n = Integer.parseInt(st.nextToken());
         m = Integer.parseInt(st.nextToken());
-
-        ans = new int[n + 1][n + 1];
-
+        
+        graph = new int[n + 1][n + 1];
+        
         for (int i = 0; i < n + 1; i++) {
-            for (int j = 0; j < n + 1; j++) {
-                ans [i][j] = -1; 
-            }
+        	 for(int j = 0; j < n + 1; j++) {
+        		 graph[i][j] = 99999999;
+        		 if (i == j) graph[i][j] = 0;
+        	 }
         }
-
-        for (int i = 0; i < n + 1; i++) {
-            ArrayList<Integer> new_list = new ArrayList<>();
-            routes.add(new_list);
-            ArrayList<Integer> new_list_1 = new ArrayList<>();
-            one_routes.add(new_list_1);
-        }
-
+        
         
         for (int i = 0; i < m; i++) {
-            st = new StringTokenizer(br.readLine());
-            int u = Integer.parseInt(st.nextToken());
-            int v = Integer.parseInt(st.nextToken());
-            int b = Integer.parseInt(st.nextToken());
-
-            
-            if (b == 1) {
-                ArrayList<Integer> routes_list = routes.get(u);
-                routes_list.add(v);
-                routes_list = routes.get(v);
-                routes_list.add(u);
-            } else {
-                ArrayList<Integer> routes_list = routes.get(u);
-                routes_list.add(v);
-                ArrayList<Integer> one_routes_list = one_routes.get(v);
-                one_routes_list.add(u);
-            }         
-        }
-        for (int i = 1; i < n + 1; i++) {
-        	ArrayList<Integer> tmp = getPossibleRoute(i);
-        	dict.put(i, tmp);
+        	st = new StringTokenizer(br.readLine());
+        	int u = Integer.parseInt(st.nextToken());
+        	int v = Integer.parseInt(st.nextToken());
+        	int b = Integer.parseInt(st.nextToken());
         	
+        	graph[u][v] = 0;
+        	if (b == 1) {
+        		graph[v][u] = 0;
+        	}else {
+        		graph[v][u] = 1;
+        	}
         }
         
+        for (int mid = 1; mid < n + 1; mid++) {
+        	for (int from = 1; from < n + 1; from++) {
+        		for (int to = 1; to < n + 1; to++) {
+        			graph[from][to] = Math.min(graph[from][to], graph[from][mid] + graph[mid][to]);
+        		}
+        	}
+        }
         
-        for (int i = 1; i < n + 1; i++)
-            bfs(i);
-
         st = new StringTokenizer(br.readLine());
-        int K = Integer.parseInt(st.nextToken());
+        int k = Integer.parseInt(st.nextToken());
         StringBuilder sb = new StringBuilder();
-        
-        for (int i = 0; i < K; i++) {
-            st = new StringTokenizer(br.readLine());
-            int s = Integer.parseInt(st.nextToken());
-            int e = Integer.parseInt(st.nextToken());
-            sb.append(ans[s][e]).append("\n");
+        for (int i = 0; i < k; i++) {
+        	st = new StringTokenizer(br.readLine());
+        	int s = Integer.parseInt(st.nextToken());
+        	int e = Integer.parseInt(st.nextToken());
+        	
+        	sb.append(graph[s][e]).append("\n");
         }
-
         System.out.println(sb.toString());
-    }
-
-    static ArrayList<Integer> getPossibleRoute(int node) {
-        boolean[] visited = new boolean[n + 1];
-        ArrayList<Integer> list = new ArrayList<>();
-        Deque<Integer> deque = new LinkedList<>();
-        
-        deque.add(node);
-        list.add(node);
-        visited[node] = true;
-
-        while (!deque.isEmpty()) {
-            int cur_node = deque.pollFirst();
-
-            ArrayList<Integer> new_list = routes.get(cur_node);
-
-            for (int new_node : new_list) {
-                if (visited[new_node]) continue;
-                visited[new_node] = true;
-                list.add(new_node);
-                deque.add(new_node);
-            }
-        }
-        
-        return list;
-    }
-    
-    static void bfs(int start) {
-        boolean[] visited = new boolean[n + 1];
-
-        Deque<int[]> deque = new LinkedList<>();
-        visited[start] = true;
-
-        deque.add(new int[] {start, 0});
-
-        while (!deque.isEmpty()) {
-            int[] cur_arr = deque.pollFirst();
-            int cur_num = cur_arr[0];
-            int cur_val = cur_arr[1];
-            
-            ArrayList<Integer> new_routes = dict.get(cur_num);
-            
-            for (int new_num : new_routes) {
-                if (ans[start][new_num] != -1) continue;
-//                if (visited[new_num]) continue;
-                ans[start][new_num] = cur_val;
-                visited[new_num] = true;
-                ArrayList<Integer> one_routes_list = one_routes.get(new_num);
-                
-                for (int new_routes_num : one_routes_list){
-                    if (visited[new_routes_num]) continue;
-                    visited[new_routes_num] = true;
-                    deque.add(new int[] {new_routes_num, cur_val + 1});
-                }
-            }
-            
-        }
     }
 }
