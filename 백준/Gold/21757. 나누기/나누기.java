@@ -19,6 +19,7 @@ class Main {
         dp = new long[4][N + 1];
         int total = 0;      
         int zero = 0;
+        int zeroCnt = 0;
         
         st = new StringTokenizer(br.readLine());
         for (int i = 0; i < N; i++) {
@@ -27,33 +28,37 @@ class Main {
             prefix[i] = total;
 
             if (arr[i] == 0) zero++;
+            if (prefix[i] == 0) zeroCnt++;
         }
 
         int target = total / 4;
         
-        for (int i = 1; i <= N; i++){
-            int parent = prefix[i - 1] / target;
-            int child = prefix[i - 1] % target;
-
-            dp[1][i] = dp[1][i - 1];
-            dp[2][i] = dp[2][i - 1];
-            dp[3][i] = dp[3][i - 1];
-            
-            if (child == 0) {
-                if (parent == 1) {
-                    dp[parent][i] += 1;
-                } else if(parent == 2) {
-                    dp[2][i] = dp[2][i - 1] + dp[1][i];
-                }  else if (parent == 3) {
-                    dp[3][i] = dp[2][i] + dp[3][i - 1];
-                }
-            } 
+        if (target == 0) {
+             if (zero == N) System.out.println( ((N - 1) * (N - 2) * (N - 3)) / 6  );
+            else System.out.println( ((zeroCnt - 1) * (zeroCnt - 2) * (zeroCnt - 3)) / 6  );
+        } else {
+            for (int i = 1; i <= N; i++){
+                int parent = prefix[i - 1] / target;
+                int child = prefix[i - 1] % target;
+    
+                dp[1][i] = dp[1][i - 1];
+                dp[2][i] = dp[2][i - 1];
+                dp[3][i] = dp[3][i - 1];
+                
+                if (child == 0) {
+                    if (parent == 1) {
+                        dp[parent][i] += 1;
+                    } else if(parent == 2) {
+                        dp[2][i] = dp[2][i - 1] + dp[1][i];
+                    }  else if (parent == 3) {
+                        dp[3][i] = dp[2][i] + dp[3][i - 1];
+                    }
+                } 
+            }
+            if (total % 4 != 0) System.out.println(0);
+            else System.out.println(dp[3][N]);
         }
-
-        if (zero == N) System.out.println( ((N - 1) * (N - 2) * (N - 3)) / 6  );
-        else if (total % 4 != 0) System.out.println(0);
-        else System.out.println(dp[3][N]);
-        
+ 
     }
 
 }
