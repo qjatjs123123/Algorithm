@@ -16,7 +16,7 @@ class Main {
         T = Integer.parseInt(st.nextToken());
 
         arr = new int[N][2];
-        dp = new int[N + 1][100001];
+        dp = new int[N + 1][T + 1];
         for (int row = 0; row < N; row++) {
             st = new StringTokenizer(br.readLine());
             
