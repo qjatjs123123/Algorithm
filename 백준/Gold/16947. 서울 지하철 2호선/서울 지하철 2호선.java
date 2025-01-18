@@ -36,7 +36,9 @@ class Main {
         int[] ans = new int[N + 1];
 
         for (int i = 1; i < N + 1; i++) ans[i] = -1;
-
+        
+        visited[1] = true;
+        stack.add(1);
         dfs(1, -1);
         
         Deque<int[]> deque = new LinkedList<>();
@@ -72,27 +74,31 @@ class Main {
     }
 
     static void dfs(int cur_node, int prev) {
-    if (flg) return;
-    visited[cur_node] = true;
-    stack.addLast(cur_node);
+        if (flg) return;
+        ArrayList<Integer> new_list = graph.get(cur_node);
 
-    ArrayList<Integer> new_list = graph.get(cur_node);
-    for (int new_node : new_list) {
-        if (new_node == prev) continue;
+        for (int new_node : new_list) {
+            
+            if (prev == new_node) continue;
+            if (visited[new_node]) {
 
-        if (visited[new_node]) { // 사이클 발견
-            flg = true;
-            while (stack.peekFirst() != new_node) { // 사이클 노드만 남기기
-                stack.pollFirst();
+                while (!stack.isEmpty()) {
+                    int left = stack.pollFirst();
+
+                    if (left == new_node) {
+                        stack.add(new_node);
+                        break;
+                    }
+                }
+                flg = true;
+                break;
             }
-            return;
+
+            stack.add(new_node);
+            visited[new_node] = true;
+            dfs(new_node, cur_node);
+            if (flg) break;
+            stack.pollLast();
         }
-
-        dfs(new_node, cur_node);
-        if (flg) return; // 사이클 발견 시 조기 종료
     }
-
-    stack.pollLast(); // 현재 노드를 스택에서 제거
-}
-
 }
