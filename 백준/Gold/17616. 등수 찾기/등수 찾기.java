@@ -6,8 +6,9 @@ import java.io.*;
 class Main {
     static int N, M, X;
     static int[] arr;
-    static HashMap<Integer, Deque<Integer>> graph = new HashMap<>();
-    static boolean[] isUse;
+    static HashMap<Integer, ArrayList<Integer>> graph = new HashMap<>();
+    static HashMap<Integer, ArrayList<Integer>> re_graph = new HashMap<>();
+    static boolean[] visited;
     
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -18,72 +19,76 @@ class Main {
         X = Integer.parseInt(st.nextToken());
         
         arr = new int[N + 1];
-        isUse = new boolean[N + 1];
+        visited = new boolean[N + 1];
         
         for (int i = 1; i <= N; i++) {
-            Deque<Integer> deque = new LinkedList<>();
+            ArrayList<Integer> deque = new ArrayList<>();
+            ArrayList<Integer> deque1 = new ArrayList<>();
             graph.put(i, deque);
+            re_graph.put(i, deque1);
         }
         
+        ArrayList<Integer> parentList = new ArrayList<>();
         for (int i = 0; i < M; i++) {
             st = new StringTokenizer(br.readLine());
             int from = Integer.parseInt(st.nextToken());
             int to = Integer.parseInt(st.nextToken());
 
-            Deque<Integer> deque = graph.get(from);
-            deque.add(to);
-            arr[to]++;
-            isUse[from] = true;
-            isUse[to] = true;
-        }
+            ArrayList<Integer> list = graph.get(from);
+            list.add(to);
+            list = re_graph.get(to);
+            list.add(from);
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
-        ArrayList<Integer> sortList = new ArrayList<>();
-        boolean isFirst = false;
-        boolean isMid = false;
-        int firstCnt = 0;
+            if (to == X) parentList.add(from);
+        }    
+
+        int childCnt = dfs(X, graph) - 1;       
+        int parentCnt = bfs(parentList);
+
+        int min_num = parentCnt + 1;
+        int max_num = N - childCnt;
+
         
-        for (int i = 1; i <= N; i++) {
-            if (arr[i] == 0) {
-                pq.add(new int[] {0, i});
-                if (i == X) isFirst = true;
-                
-            }
-            if (arr[i] == 0 && isUse[i]) firstCnt++;
-            
-        }
-     
-        while (!pq.isEmpty()) {
-            int[] cur_arr = pq.poll();
-            int cur_cnt = cur_arr[0];
-            int cur_num = cur_arr[1];
+        System.out.println(min_num + " " + max_num);
+    }
 
-            Deque<Integer> cur_deque = graph.get(cur_num);
-            for (int new_num : cur_deque) {
-                arr[new_num]--;
-                if (arr[new_num] == 0) {
-                    sortList.add(new_num);
-                    pq.add(new int[] {arr[new_num], new_num});
-                    if (new_num == X) isMid = true;
-                }
+    static int bfs(ArrayList<Integer> parentList) {
+        visited = new boolean[N + 1];
+
+        Deque<Integer> deque = new LinkedList<>();
+        for(int node : parentList) {
+            visited[node] = true;
+            deque.add(node);
+        }
+        int ans = parentList.size();
+
+        while (!deque.isEmpty()) {
+            int cur_node = deque.pollFirst();
+
+            ArrayList<Integer> new_list = re_graph.get(cur_node);
+            for (int new_node : new_list) {
+                if (visited[new_node]) continue;
+                ans++;
+                visited[new_node] = true;
+                deque.add(new_node);
             }
         }
-        int num = N - sortList.size();
 
-        if (isFirst && isUse[X]) {   
-            System.out.println(1 + " " + num);
-        } else if (isMid) {
-            int idx = 0;
-            for (int i = 0; i < sortList.size(); i++) {
-                if (sortList.get(i) == X) {
-                    idx = i + 1;
-                    break;
-                }
-            }
+        return ans;
+    }
+    
+    static int dfs(int node, HashMap<Integer, ArrayList<Integer>> graph) {
 
-            System.out.println( (firstCnt + idx) + " " + (num + idx));
-        } else {
-            System.out.println(1 + " " + N);
+        ArrayList<Integer> new_list = graph.get(node);
+        
+        int total = 1;
+        
+        for (int new_node : new_list) {
+            if (visited[new_node]) continue;
+            visited[new_node] = true;
+            total += dfs(new_node, graph);
         }
+
+        return total;
     }
 }
