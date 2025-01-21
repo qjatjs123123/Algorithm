@@ -5,108 +5,68 @@ import java.io.*;
 // The main method must be in a class named "Main".
 class Main {
     static char[] charArr;
-    static int[][] posArr;
-    static int count = 0;
-    static TreeSet<String> results = new TreeSet<>();
+    static ArrayList<int[]> posList = new ArrayList<>();
     static Stack<Integer> stack = new Stack();
-    static StringBuilder sb = new StringBuilder();
-    static HashMap<String, Boolean> visited = new HashMap<>();
-    static int c = 0;
+    static TreeSet<String> ts = new TreeSet();
     
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
+
         String str = st.nextToken();
-        
         charArr = new char[str.length()];
-        for (int i = 0; i < str.length(); i++) {
-            charArr[i] = str.charAt(i);
-
-            if (charArr[i] == '(') count++;
-        }
-
-        posArr = new int[count][2];
         
-        find(0);
-        Arrays.sort(posArr, (a, b) -> a[0] - b[0]);
+        for (int i = 0; i < str.length(); i++) charArr[i] = str.charAt(i);
 
-        backtracking(0);
-        String ss="";
+        Stack<Integer> stack = new Stack();
+        
         for (int i = 0; i < charArr.length; i++) {
-            if (charArr[i] == '(' || charArr[i] == ')') continue;
-            ss += charArr[i];
+            if (charArr[i] == '(') stack.push(i);
+            if (charArr[i] == ')') posList.add(new int[] {stack.pop(), i});
         }
-        results.add(ss);
-        results.forEach(System.out::println);
+
+        Collections.sort(posList, (a, b) -> a[0] - b[0]);
+
+
+        for (int i = 1; i <= posList.size(); i++) {
+            backtracking(0, i, 0);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (String s : ts) sb.append(s).append("\n");
+
+        System.out.println(sb.toString());
     }
 
-    static void find(int start) {
-        if (start >= charArr.length) return;
-        
-        for (int i = start; i < charArr.length; i++) {
-            if (charArr[i] == '(') {
-                stack.push(i);
-                find(i + 1);
-                return;
-            }
-            if (stack.size() != 0 && charArr[i] == ')') {
-                posArr[c][0] = stack.pop();
-                posArr[c][1] = i;
-                c++;
-
-                find(i + 1);
-                return;
-            }
-        }
-    }
-    
-    static void backtracking(int start) {
-        
-        if (start >= count || stack.size() == count - 1) {
-            //System.out.println(stack);
+    static void backtracking(int depth, int maxNum, int start) {
+        if (depth == maxNum) {
+            cal();
             return;
         }
         
-        for (int i = start; i < count; i++) {
+        for (int i = start; i < posList.size(); i++) {
             stack.push(i);
-            backtracking(i + 1);
-            
-            ArrayList<Integer> tmp = new ArrayList<>();
-            
-            for (int n : stack) {
-                int[] cur_pos = posArr[n];
-
-                tmp.add(cur_pos[0]);
-                tmp.add(cur_pos[1]);
-            } 
-
-            Collections.sort(tmp);
-
-            int pointer = 0;
-            String ss = "";
-            for (int j = 0; j < charArr.length; j++) {
-                
-                if (charArr[j] == '(' || charArr[j] == ')') {
-                    if (pointer < tmp.size() && j == tmp.get(pointer)) {
-                        pointer++;     
-
-                        ss += charArr[j];
-                        continue;
-                    }else {
-                        continue;
-                    }
-                    
-                }
-                ss += charArr[j];
-                
-            }
-
-            results.add(ss.toString());
-            
+            backtracking(depth + 1, maxNum, i + 1);
             stack.pop();
         }
+    }
 
-        
+    static void cal() {
+        HashMap<Integer, Boolean> dict = new HashMap<>();
+
+        for (int idx : stack) {
+            int[] cur_arr = posList.get(idx);
+            dict.put(cur_arr[0], true);
+            dict.put(cur_arr[1], true);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0 ; i < charArr.length; i++) {
+            if (dict.containsKey(i)) continue;
+            sb.append(charArr[i]);
+        }
+
+        ts.add(sb.toString());
         
     }
 }
