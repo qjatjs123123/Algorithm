@@ -1,83 +1,112 @@
 import java.util.*;
+import java.lang.*;
 import java.io.*;
 
+// The main method must be in a class named "Main".
 class Main {
     static char[] charArr;
     static int[][] posArr;
     static int count = 0;
-    static Stack<Integer> stack = new Stack<>();
-    static TreeSet<String> results = new TreeSet<>(); // 중복 제거 및 정렬
+    static TreeSet<String> results = new TreeSet<>();
+    static Stack<Integer> stack = new Stack();
+    static StringBuilder sb = new StringBuilder();
+    static HashMap<String, Boolean> visited = new HashMap<>();
     static int c = 0;
-
-    public static void main(String[] args) throws IOException {
+    
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String str = br.readLine(); // 입력 문자열
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        String str = st.nextToken();
+        
+        charArr = new char[str.length()];
+        for (int i = 0; i < str.length(); i++) {
+            charArr[i] = str.charAt(i);
 
-        // 문자 배열 초기화 및 괄호 쌍 개수 확인
-        charArr = str.toCharArray();
-        for (char c : charArr) {
-            if (c == '(') count++;
+            if (charArr[i] == '(') count++;
         }
 
-        // 괄호 쌍 위치 배열 초기화
         posArr = new int[count][2];
-        findBrackets();
+        
+        find(0);
+        Arrays.sort(posArr, (a, b) -> a[0] - b[0]);
 
-        // 백트래킹을 통해 괄호 제거 조합 생성
         backtracking(0);
-
-        // 결과 출력 (TreeSet은 자동으로 사전순 정렬됨)
+        String ss="";
+        for (int i = 0; i < charArr.length; i++) {
+            if (charArr[i] == '(' || charArr[i] == ')') continue;
+            ss += charArr[i];
+        }
+        results.add(ss);
         results.forEach(System.out::println);
     }
 
-    // 괄호 쌍 위치를 찾는 메서드
-    static void findBrackets() {
-        Stack<Integer> localStack = new Stack<>();
-        for (int i = 0; i < charArr.length; i++) {
+    static void find(int start) {
+        if (start >= charArr.length) return;
+        
+        for (int i = start; i < charArr.length; i++) {
             if (charArr[i] == '(') {
-                localStack.push(i);
-            } else if (charArr[i] == ')') {
-                posArr[c][0] = localStack.pop();
+                stack.push(i);
+                find(i + 1);
+                return;
+            }
+            if (stack.size() != 0 && charArr[i] == ')') {
+                posArr[c][0] = stack.pop();
                 posArr[c][1] = i;
                 c++;
+
+                find(i + 1);
+                return;
             }
         }
     }
-
-    // 백트래킹으로 괄호 제거 조합 생성
+    
     static void backtracking(int start) {
-        if (start >= count) {
+        
+        if (start >= count || stack.size() == count - 1) {
+            //System.out.println(stack);
             return;
         }
-
+        
         for (int i = start; i < count; i++) {
-            stack.push(i); // 현재 괄호 쌍 추가
-            ArrayList<Integer> tmp = new ArrayList<>();
-
-            // 스택에 있는 괄호 쌍의 위치 저장
-            for (int n : stack) {
-                tmp.add(posArr[n][0]);
-                tmp.add(posArr[n][1]);
-            }
-
-            Collections.sort(tmp); // 위치 정렬
-
-            // 괄호 제거 후 새로운 문자열 생성
-            StringBuilder ss = new StringBuilder();
-            for (int j = 0; j < charArr.length; j++) {
-                if (!tmp.contains(j)) {
-                    ss.append(charArr[j]);
-                }
-            }
-
-            // 중복 제거를 위해 TreeSet에 저장
-            results.add(ss.toString());
-
-            // 재귀 호출
+            stack.push(i);
             backtracking(i + 1);
+            
+            ArrayList<Integer> tmp = new ArrayList<>();
+            
+            for (int n : stack) {
+                int[] cur_pos = posArr[n];
 
-            // 스택에서 제거
+                tmp.add(cur_pos[0]);
+                tmp.add(cur_pos[1]);
+            } 
+
+            Collections.sort(tmp);
+
+            int pointer = 0;
+            String ss = "";
+            for (int j = 0; j < charArr.length; j++) {
+                
+                if (charArr[j] == '(' || charArr[j] == ')') {
+                    if (pointer < tmp.size() && j == tmp.get(pointer)) {
+                        pointer++;     
+
+                        ss += charArr[j];
+                        continue;
+                    }else {
+                        continue;
+                    }
+                    
+                }
+                ss += charArr[j];
+                
+            }
+
+            results.add(ss.toString());
+            
             stack.pop();
         }
+
+        
+        
     }
 }
