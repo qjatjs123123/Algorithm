@@ -1,57 +1,52 @@
-
 import java.util.*;
-import java.util.stream.Collectors;
+import java.lang.*;
 import java.io.*;
 
-public class Main
-{
+// The main method must be in a class named "Main".
+class Main {
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-	public static void main(String args[]) throws Exception
-	{
-//		BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));	
-		
-		int n = Integer.parseInt(br.readLine());
-		String[] str = br.readLine().split(" ");
-		
-		int[] arr = new int[n];
-		for (int i = 0; i<n; i++) {
-			arr[i] = Integer.parseInt(str[i]);
-		}
-		
-		PriorityQueue<int[]> pq = new PriorityQueue<>((int[] a, int[] b) -> a[0] - b[0]);
-		
-		int[] ans = new int[n];
-		for (int i = n - 1; i >= 0; i--) {
-			int[] tmp = {arr[i], i};
-			
-			if (pq.isEmpty()) {
-				pq.add(tmp);
-			}else {
-				int[] cur_tmp = pq.poll();
-				
-				if (tmp[0] > cur_tmp[0]) {
-					pq.add(cur_tmp);
-					while (!pq.isEmpty()) {
-						int[] t = pq.poll();
-						
-						if (tmp[0] <= t[0]) {pq.add(t); break;}
-						ans[t[1]] = tmp[1] + 1;
-						
-					}
-					pq.add(tmp);
-				}else {
-					pq.add(cur_tmp);
-					pq.add(tmp);
-				}
-			}
+        int n = Integer.parseInt(st.nextToken());
 
-		}
-		
-		String result = Arrays.stream(ans)
-                .mapToObj(String::valueOf)
-                .collect(Collectors.joining(" "));
-		System.out.println(result);
-    }	
-		
+        int[] arr = new int[n];
+
+        st = new StringTokenizer(br.readLine());
+        for (int i = 0; i < n; i++) arr[i] = Integer.parseInt(st.nextToken());
+    
+        Stack<int[]> stack = new Stack();
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < n; i++) {
+            if (i == 0) {
+                stack.push(new int[] {arr[i], i + 1});
+                sb.append(i).append(" ");
+                continue;
+            }
+            boolean isTallest = true;
+            while (stack.size() != 0) {
+                int[] top = stack.peek();
+                int height = top[0];
+                int idx = top[1];
+                
+                if (height > arr[i]) {
+                    stack.push(new int[] {arr[i], i + 1});
+                    sb.append(idx).append(" ");
+                    isTallest = false;
+                    break;
+                } else{
+                    stack.pop();
+                }
+            }
+
+            if (isTallest) {
+                sb.append(0).append(" ");
+                stack.push(new int[] {arr[i], i + 1});
+            }
+        }
+
+        System.out.println(sb.toString());
+    }
 }
