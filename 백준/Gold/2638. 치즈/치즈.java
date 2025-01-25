@@ -1,119 +1,128 @@
-
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	static int N, M;
-	static int[][] graph;
-	static int[][] direction = {
-			{1, 0},
-			{-1, 0},
-			{0, 1},
-			{0, -1}
-	};
-	
-	public static void main(String[] args) throws IOException {
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
-		
-		graph = new int[N][M];
-		
-		for (int row = 0; row < N; row++) {
-			String[] colList = br.readLine().split(" ");
-			for (int col = 0; col < M; col++) graph[row][col] = Integer.parseInt(colList[col]);
-		}
-		
-		int time = 0;
-		
-		while (true) {
-			boolean[][] visited = new boolean[N][M];
-			boolean[][] hole = new boolean[N][M];
-			// 치즈 안 내부 구멍 검사
-			for (int row = 0; row < N; row++) {
-				for (int col = 0; col < M; col++) {
-					if (!visited[row][col] && graph[row][col] == 0) 
-						decideInsideHole(row, col, visited, hole);
-				}
-			}
+// The main method must be in a class named "Main".
+class Main {
+    static int N, M;
+    static int[][] graph;
+    static boolean[][] visited;
+    static int CHEEZE_CNT = 0;
+    static int[] dy = new int[] {1, -1, 0, 0};
+    static int[] dx = new int[] {0, 0, 1, -1};
 
-			Stack<int[]> stack = new Stack<>();
-			for (int row = 0; row < N; row++) {
-				for (int col = 0; col < M; col++) {
-					if (graph[row][col] == 1 && decideRemove(row, col, hole)) {
-						stack.push(new int[] {row, col});
+    static class Pos {
+        int row, col;
 
-					}
-				}
-			}
-			
-			if (stack.isEmpty()) break;
-			
-			while(!stack.isEmpty()) {
-				int[] arr = stack.pop();
-				graph[arr[0]][arr[1]] = 0;
-			}
-			time++;
+        Pos(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
+    }
+    
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-		}
-		
-		
-		System.out.println(time);
-	}
-	
-	static boolean decideRemove(int row, int col, boolean[][] hole) {
-		
-		int count = 0;
-		for(int[] direct: direction) {
-			int new_row = row + direct[0];
-			int new_col = col + direct[1];
-			
-			if (graph[new_row][new_col] == 0 && !hole[new_row][new_col]) count++;
-		}
-		
-		if (count >= 2) return true;
-		else return false;
-	}
-	
-	static void decideInsideHole(int row, int col, boolean[][] visited, boolean[][] hole) {
-		
-		Deque<int[]> deque = new LinkedList<>();
-		deque.add(new int[] {row, col});
-		boolean isInside = true;
-		Stack<int[]> stack = new Stack<>();
-		stack.add(new int[] {row, col});
-		visited[row][col] = true;
-		
-		while (!deque.isEmpty()) {
-			int[] tmp = deque.poll();
-			int cur_row = tmp[0];
-			int cur_col = tmp[1];
-			
-			for (int[] direct : direction) {
-				int new_row = cur_row + direct[0];
-				int new_col = cur_col + direct[1];
-				
-				if (new_row < 0 || new_row == N || new_col < 0 || new_col == M) {
-					isInside = false;
-					continue;
-				}
-				if (visited[new_row][new_col] || graph[new_row][new_col] == 1) continue;
-				
-				visited[new_row][new_col] = true;
-				deque.add(new int[] {new_row, new_col});
-				stack.add(new int[] {new_row, new_col});
-			}
-		}
-		
-		if (isInside) {
-			while (!stack.isEmpty()) {
-				int[] arr = stack.pop();
-				hole[arr[0]][arr[1]] = true;
-			}
-		}
-	}
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+
+        graph = new int[N][M];
+        visited = new boolean[N][M];
+
+        for (int row = 0; row < N; row++) {
+            st = new StringTokenizer(br.readLine());
+
+            for (int col = 0; col < M; col++) {
+                graph[row][col] = Integer.parseInt(st.nextToken());
+
+                if (graph[row][col] == 1) CHEEZE_CNT++;
+            }
+        }
+
+        int time = 0;
+        int cur_cnt = 0;
+        
+        while (cur_cnt < CHEEZE_CNT) {
+            visited = new boolean[N][M];
+
+            ArrayList<Pos> boundaryList = getBoundary();
+            ArrayList<Pos> validBoundaryList = getValidBoundary(boundaryList);
+            removeCheeze(validBoundaryList);
+            
+            cur_cnt += validBoundaryList.size();    
+            time++;
+        }
+
+        System.out.println(time);
+        
+    }
+
+    static void removeCheeze(ArrayList<Pos> validBoundaryList) {
+        for (Pos pos : validBoundaryList) {
+            graph[pos.row][pos.col] = 0;
+        }
+    }
+    
+    static ArrayList<Pos> getValidBoundary(ArrayList<Pos> boundaryList) {
+        ArrayList<Pos> validBoundaryList = new ArrayList<>();
+
+        for (Pos pos : boundaryList) {
+            int cnt = 0;
+    
+            for (int i = 0; i < 4; i++) {
+                int new_row = pos.row + dy[i];
+                int new_col = pos.col + dx[i];
+
+                if (new_row < 0 || new_row == N ||
+                   new_col < 0 || new_col == M) continue;
+
+                if (graph[new_row][new_col] == 0 && visited[new_row][new_col]) cnt++;
+            }
+
+            if (cnt >= 2) validBoundaryList.add(new Pos(pos.row, pos.col));
+        }
+
+        return validBoundaryList;
+    }
+    
+    static void display(ArrayList<Pos> list) {
+        int[][] g = new int[N][M];
+
+        for (Pos pos : list) {
+            g[pos.row][pos.col] = 1;
+        }
+
+        for (int[] a : g) {
+            System.out.println(Arrays.toString(a));
+        }
+    }
+    
+    static ArrayList<Pos> getBoundary() {
+        ArrayList<Pos> boundaryList = new ArrayList<>();
+
+        Deque<Pos> deque = new LinkedList<>();
+        deque.add(new Pos(0, 0));
+        visited[0][0] = true;
+        
+        while (!deque.isEmpty()) {
+            Pos cur_pos = deque.pollFirst();
+
+            for (int i = 0; i < 4; i++) {
+                int new_row = cur_pos.row + dy[i];
+                int new_col = cur_pos.col + dx[i];
+
+                if (new_row < 0 || new_row == N ||
+                   new_col < 0 || new_col == M) continue;
+                if (visited[new_row][new_col]) continue;
+
+                if (graph[new_row][new_col] == 0) deque.add(new Pos(new_row, new_col));
+                else boundaryList.add(new Pos(new_row, new_col));
+
+                visited[new_row][new_col] = true;
+            }
+        }
+
+        return boundaryList;
+    }
 }
-
