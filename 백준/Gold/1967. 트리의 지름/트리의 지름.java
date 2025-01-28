@@ -8,6 +8,7 @@ class Main {
     static ArrayList<int[]>[] graph;
     static int ans = 0;
     static boolean[] visited;
+    static int max_node = 0;
     
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -29,11 +30,15 @@ class Main {
             graph[child].add(new int[] {parent, weight});
         }
 
-        for (int cur_node = 1; cur_node <= n; cur_node++) {
-            visited = new boolean[n + 1];
-            visited[cur_node] = true;
-            recursion(cur_node, 0);
-        }
+        visited = new boolean[n + 1];
+        visited[1] = true;
+        recursion(1, 0);
+        ans = 0;
+
+
+        visited = new boolean[n + 1];
+        visited[max_node] = true; 
+        recursion(max_node, 0);
 
         System.out.println(ans);
     }
@@ -50,6 +55,9 @@ class Main {
              flg = true;
          }       
 
-        if (!flg) ans = Math.max(ans, total);
+        if (!flg && ans < total) {
+            ans = Math.max(ans, total);
+            max_node = cur_node;
+        }
     }
 }
