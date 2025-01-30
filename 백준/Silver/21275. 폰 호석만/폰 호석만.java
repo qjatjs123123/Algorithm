@@ -25,10 +25,10 @@ class Main {
 
         ArrayList<long[]> list = new ArrayList<>();
         
-        for (int i = Math.max(2, A_min_jinsu); i <= 36; i++) {
+        for (int i = Math.max(2, A_min_jinsu + 1); i <= 36; i++) {
             long A_ten_jinsu = getTenJinsu(A, i);
             
-            for (int j = Math.max(2,B_min_jinsu); j <= 36; j++) {
+            for (int j = Math.max(2,B_min_jinsu + 1); j <= 36; j++) {
                 long B_ten_jinsu = getTenJinsu(B, j);
 
                 if (A_ten_jinsu == B_ten_jinsu && i != j && A_ten_jinsu != Long.MAX_VALUE) {
