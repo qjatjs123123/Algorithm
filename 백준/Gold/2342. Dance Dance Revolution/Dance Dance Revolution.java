@@ -2,59 +2,67 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 
+// The main method must be in a class named "Main".
 class Main {
     static ArrayList<Integer> list = new ArrayList<>();
-    static int[][][] memo;
-    
+    static int[][][] dp;
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
         while (true) {
             int n = Integer.parseInt(st.nextToken());
-            if (n == 0) break;
 
+            if (n == 0) break;
             list.add(n);
         }
 
-        memo = new int[list.size()][5][5];
+        dp = new int[list.size()][5][5];
 
-        System.out.println(dp(0, 0, 0));
-    }
-
-    static int dp(int idx, int left, int right) {
-        if (idx == list.size()) return 0;
-        if (memo[idx][left][right] != 0) return memo[idx][left][right];
-        int cur_cmd = list.get(idx);
-
-        int left_score = getScore(left, cur_cmd);
-        int right_score = getScore(right, cur_cmd);
-        int total = Integer.MAX_VALUE;
-        if (cur_cmd != right) {
-            total = Math.min(total, dp(idx + 1, cur_cmd, right) + left_score);
+        for (int row = 0; row < list.size(); row++) {
+            for (int i = 0; i < 5; i++) {
+                for (int j = 0; j < 5; j++) {
+                    dp[row][i][j] = -1;
+                }
+            }
         }
-        if (cur_cmd != left) {
-            total = Math.min(total, dp(idx + 1, left, cur_cmd) + right_score);
-        }
-       
-        memo[idx][left][right] = total;
-        return total;
-    }
-    
-    static int getScore(int pos, int cmd) {
-        if (pos == 0) return 2;
-
-        if (pos == cmd) return 1;
         
-        if (pos == 1 || pos == 3) {
-            if (cmd == 2 || cmd == 4) return 3;
-            return 4;
+        System.out.println(dfs(0, 0, 0));
+    }
+
+    static int dfs(int depth, int right_pos, int left_pos) {
+        if (depth == list.size()) {
+            return 0;
         }
 
-        else{
-            if (cmd == 1 || cmd == 3) return 3;
-            return 4;
+        if (dp[depth][right_pos][left_pos] != -1) return dp[depth][right_pos][left_pos];
+        
+        int target = list.get(depth);
+
+        int result = Integer.MAX_VALUE;
+        
+        //right
+        if (right_pos == 0) {
+            result = Math.min(result, dfs(depth + 1, target, left_pos) + 2);
+        } else if (right_pos == target) {
+            result = Math.min(result, dfs(depth + 1, target, left_pos) + 1);
+        } else if (Math.abs(target - right_pos) == 2) {
+            result = Math.min(result, dfs(depth + 1, target, left_pos) + 4);
+        } else {
+            result = Math.min(result, dfs(depth + 1, target, left_pos) + 3);
         }
 
+        if (left_pos == 0) {
+            result = Math.min(result, dfs(depth + 1, right_pos, target) + 2);
+        } else if (left_pos == target) {
+            result = Math.min(result, dfs(depth + 1, right_pos, target) + 1);
+        } else if (Math.abs(target - left_pos) == 2) {
+            result = Math.min(result, dfs(depth + 1, right_pos, target) + 4);
+        } else {
+            result = Math.min(result, dfs(depth + 1, right_pos, target) + 3);
+        }
+
+        dp[depth][right_pos][left_pos] = result;
+        return result;
     }
 }
