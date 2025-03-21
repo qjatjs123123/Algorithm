@@ -1,59 +1,49 @@
-import java.io.*;
 import java.util.*;
 
 class Solution {
     public int solution(int distance, int[] rocks, int n) {
-        Arrays.sort(rocks);
+        int answer = distance;
         ArrayList<Integer> list = new ArrayList<>();
         list.add(0);
+        Arrays.sort(rocks);
         
-        for (int num : rocks) list.add(num);
+        for (int i = 0; i < rocks.length; i++ ) list.add(rocks[i]);
         list.add(distance);
         
-        int start = 1;
+        
+        int start = 0;
         int end = distance;
         
-        int ans = 0;
-        
         while (start <= end) {
-            int mid = (start + end) / 2;
+            answer = (start + end) / 2;
             
-            int cur_idx = 0;
-            int cur_num = mid;
-            int rock_cnt = 0;
+            int jumpCnt = 0;
+            int cur_pos = 0;
             
             while (true) {
-                int new_idx = binary_search(list, cur_num);
-                if (new_idx == list.size()) {
-                    rock_cnt += list.size() - cur_idx - 1;
-                    break;
-                }
-                
-                rock_cnt += (new_idx - cur_idx - 1);
-
-                cur_idx = new_idx;
-                cur_num = list.get(new_idx) + mid;
+                cur_pos += answer;
+                int idx = binary_search(list, cur_pos);
+                jumpCnt++;
+                if (idx >= list.size()) break;
+                cur_pos = list.get(idx);
+                                 
             }
             
-            // System.out.println(start + " " + end + " " + mid + " " + rock_cnt);
-            
-            if (rock_cnt > n) end = mid - 1;
-            else start = mid + 1;
-        
-        }
-        
-        return end;
+            if (jumpCnt <= rocks.length - n + 1) end = answer - 1;
+            else start = answer + 1;
+        } 
+        return start;
     }
     
-    static int binary_search(ArrayList<Integer> list, int target) {    
+    static int binary_search(ArrayList<Integer> rocks, int target) {
         int start = 0;
-        int end = list.size() - 1;
+        int end = rocks.size() - 1;
         
         while (start <= end) {
             int mid = (start + end) / 2;
             
-            if (list.get(mid) < target) start = mid + 1; 
-            else end = mid - 1;
+            if (rocks.get(mid) > target) end = mid - 1;
+            else start = mid + 1;
         }
         
         return start;
