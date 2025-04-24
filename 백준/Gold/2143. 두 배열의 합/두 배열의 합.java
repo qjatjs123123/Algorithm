@@ -1,85 +1,61 @@
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
+// The main method must be in a class named "Main".
+class Main {
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-	public static void main(String[] args) throws IOException {
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
-		StringTokenizer st = new StringTokenizer(br.readLine());	
-		int T = Integer.parseInt(st.nextToken());
-	
-		st = new StringTokenizer(br.readLine());	
-		int n = Integer.parseInt(st.nextToken());
-		
-		int[] arr1 = new int[n];
-		st = new StringTokenizer(br.readLine());	
-		for (int i = 0; i < n; i++) arr1[i] = Integer.parseInt(st.nextToken());
-		
-		st = new StringTokenizer(br.readLine());	
-		int m = Integer.parseInt(st.nextToken());
-		
-		int[] arr2 = new int[m];
-		st = new StringTokenizer(br.readLine());	
-		for (int i = 0; i < m; i++) arr2[i] = Integer.parseInt(st.nextToken());
-		
-		ArrayList<Long> list1 = new ArrayList<>();
-		for (int i = 0; i < n; i++) {
-			long total = 0;
-			for (int j = i; j < n; j++) {
-				total += arr1[j];
-				list1.add(total);
-			}
-		}
-		
-		ArrayList<Long> list2 = new ArrayList<>();
-		for (int i = 0; i < m; i++) {
-			long total = 0;
-			for (int j = i; j < m; j++) {
-				total += arr2[j];
-				list2.add(total);
-			}
-		}
-		
-		Collections.sort(list2);
-		
-		long ans = 0;
-		for (Long num : list1) {
-			Long target = T - num;
-			int up = upperBound(target, list2);
-			int lo = lowerBound(target, list2);
-			
-			ans += (up - lo);
-		}
-		System.out.println(ans);
-	}
-	
-	static int upperBound(long target, ArrayList<Long> list) {
-		int start = 0;
-		int end = list.size() - 1;
-		
-		while (start <= end) {
-			int mid = (start + end) / 2;
-			
-			if (target >= list.get(mid)) start = mid + 1;
-			else end = mid - 1;
-		}
-		
-		return end;
-	}
-	
-	static int lowerBound(long target, ArrayList<Long> list) {
-		int start = 0;
-		int end = list.size() - 1;
-		
-		while (start <= end) {
-			int mid = (start + end) / 2;
-			
-			if (target > list.get(mid)) start = mid + 1;
-			else end = mid - 1;
-		}
-		
-		return end;
-	}
+        int T = Integer.parseInt(st.nextToken());
+
+        HashMap<Long, Long> countA = new HashMap<>();
+        st = new StringTokenizer(br.readLine());
+        int n1 = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        long[] arrA = new long[n1];
+        for (int i = 0; i < n1; i++) arrA[i] = Long.parseLong(st.nextToken());
+
+        HashMap<Long, Long> countB = new HashMap<>();
+        st = new StringTokenizer(br.readLine());
+        int n2 = Integer.parseInt(st.nextToken());
+        st = new StringTokenizer(br.readLine());
+        long[] arrB = new long[n2];
+        for (int i = 0; i < n2; i++) arrB[i] = Long.parseLong(st.nextToken());
+        
+        makeTreeMap(countA, arrA);
+        makeTreeMap(countB, arrB);
+
+        long total = 0;
+        
+        for (long key : countA.keySet()) {
+            long target = T - key;
+
+            if (countB.containsKey(target)) {
+                total += countA.get(key) * countB.get(target);
+            }
+        }
+
+        System.out.println(total);
+    }
+
+    static void makeTreeMap(HashMap<Long, Long> tm, long[] arr) {
+        int len = arr.length;
+        
+        for (int gap = 1; gap <= len; gap++) {
+
+            for (int start = 0; start < len - gap + 1; start++) {
+                long total = 0;
+                for (int i = start ; i < start + gap; i++) {
+                    total += arr[i];
+                }
+
+                if (tm.containsKey(total)) {
+                    tm.put(total, tm.get(total) + 1);
+                } else 
+                    tm.put(total, 1L);
+            }
+        }
+    }
 }
