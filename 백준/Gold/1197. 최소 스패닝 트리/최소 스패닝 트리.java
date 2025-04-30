@@ -1,80 +1,75 @@
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
+// The main method must be in a class named "Main".
+class Main {
+    static int V, E;
+    static int[] parents;
+    static class Edge implements Comparable<Edge> {
+        int from, to, dist;
 
-public class Main
-{
-	static int V, E;
-	static Edge[] edgeList;
-	static int[] parents;
-    public static void main(String[] args) throws IOException
-    {
-//        BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
+        Edge(int from, int to, int dist) {
+            this.from = from;
+            this.to = to;
+            this.dist = dist;
+        }
+
+        @Override
+        public int compareTo(Edge o) {
+            return this.dist - o.dist;
+        }
+    }
+    
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-        
+
         V = Integer.parseInt(st.nextToken());
         E = Integer.parseInt(st.nextToken());
-        edgeList = new Edge[E];
+
+        Edge[] EdgeArr = new Edge[E + 1];
+        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        
         for (int i = 0; i < E; i++) {
-        	st = new StringTokenizer(br.readLine());
-        	int from = Integer.parseInt(st.nextToken());
-        	int to = Integer.parseInt(st.nextToken());
-        	int weight = Integer.parseInt(st.nextToken());
-        	
-        	edgeList[i] = new Edge(from, to, weight);
+            st = new StringTokenizer(br.readLine());
+
+            int from = Integer.parseInt(st.nextToken());
+            int to = Integer.parseInt(st.nextToken());
+            int dist = Integer.parseInt(st.nextToken());
+            EdgeArr[i] = new Edge(from, to, dist);
+            pq.add(EdgeArr[i]);
         }
-        
-        Arrays.sort(edgeList);
-        
-        int weight = 0;
-        int cnt = 0;
-        make();
-        
-        for (Edge edge : edgeList) {
-        	if (!union(edge.from, edge.to)) continue;
-        	
-        	weight += edge.weight;
-        	if(++cnt == V - 1) break;
+
+        parents = new int[V + 1];
+        for (int i = 0; i < V + 1; i++) parents[i] = i;
+
+        long answer = 0;
+        while (!pq.isEmpty()) {
+            Edge edge = pq.poll();
+
+            if (!union(edge.from, edge.to)) continue;
+
+            answer += edge.dist;
         }
-        
-        System.out.println(weight);
+
+        System.out.println(answer);
     }
-    
-    static void make() {
-    	parents = new int[V + 1];
-    	
-    	for (int i = 1; i < V + 1; i++) parents[i] = i;
-    }
-    
+
     static int find(int a) {
-    	if (parents[a] == a) return a;
-    	return parents[a] = find(parents[a]);
+        if (a == parents[a]) return a;
+
+        return parents[a] = find(parents[a]);
     }
-    
+
     static boolean union(int a, int b) {
-    	int aRoot = find(a);
-    	int bRoot = find(b);
-    	
-    	if (parents[aRoot] == parents[bRoot]) return false;
-    	parents[bRoot] = parents[aRoot];
-    	return true;
+        int rootA = find(a);
+        int rootB = find(b);
+
+        if (rootA == rootB) return false;
+
+        parents[rootA] = parents[rootB];
+
+        return true;
     }
-}
-
-class Edge implements Comparable<Edge>{
-	int from, to, weight;
-
-	public Edge(int from, int to, int weight) {
-		super();
-		this.from = from;
-		this.to = to;
-		this.weight = weight;
-	}
-
-	@Override
-	public int compareTo(Edge o) {
-		return weight - o.weight;
-	}
-	
 }
