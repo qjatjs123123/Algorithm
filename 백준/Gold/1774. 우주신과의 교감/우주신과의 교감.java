@@ -1,106 +1,98 @@
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	static int N, M;
-	static ArrayList<int[]> posList;
-	static int[] parents;
-	
-    public static void main(String[] args) throws IOException {
+// The main method must be in a class named "Main".
+class Main {
+    static int N, M;
+    static PriorityQueue<Edge> pq = new PriorityQueue<>();
+    static int[][] posArr;
+    static int[] parents;
+    
+    static class Edge implements Comparable<Edge> {
+        int from, to;
+        double dist;
+
+        Edge(int from, int to, double dist) {
+            this.from = from;
+            this.to = to;
+            this.dist = dist;
+        }
+
+        @Override
+        public int compareTo(Edge o) {
+            return Double.compare(this.dist, o.dist);
+        } 
+    }
+    
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
 
-        posList = new ArrayList<>();
+        posArr = new int[N + 1][2];
+        for (int i = 1; i <= N; i++) {
+            st = new StringTokenizer(br.readLine());
+
+            int X = Integer.parseInt(st.nextToken());
+            int Y = Integer.parseInt(st.nextToken());
+
+            posArr[i][0] = X;
+            posArr[i][1] = Y;
+        }
+
         parents = new int[N + 1];
-        
-        for (int i = 0; i <= N; i++) {
-        	if (i == 0) {
-        		posList.add(new int[] {});
-        		continue;
-        	}
-        	
-        	st = new StringTokenizer(br.readLine());
-        	int x = Integer.parseInt(st.nextToken());
-        	int y = Integer.parseInt(st.nextToken());
-        	
-        	posList.add(new int[] {x, y});
-        }
-        
         for (int i = 1; i <= N; i++) parents[i] = i;
-        
+
         for (int i = 0; i < M; i++) {
-        	st = new StringTokenizer(br.readLine());
-        	int from = Integer.parseInt(st.nextToken());
-        	int to = Integer.parseInt(st.nextToken());
-        	
-        	union(from, to);
-        }
-        
-        PriorityQueue pq = new PriorityQueue<>();
-        
-        for (int from = 1; from <= N; from++) {
-        	int[] fromArr = posList.get(from);
-        	int fromX = fromArr[0];
-        	int fromY = fromArr[1];
-        	
-        	for (int to = from + 1; to <= N; to++) {
-        		int[] toArr = posList.get(to);
-            	int toX = toArr[0];
-            	int toY = toArr[1];
-            	
-            	double weight = Math.sqrt( Math.pow(fromX - toX, 2) + Math.pow(fromY - toY, 2) );
+            st = new StringTokenizer(br.readLine());
 
-            	pq.add(new Pos(from, to, weight));
-        	}
+            int from = Integer.parseInt(st.nextToken());
+            int to = Integer.parseInt(st.nextToken());
+
+            union(from, to);
         }
-        
-        double ans = 0;
-        int cnt = 0;
-        
+
+        double answer = 0;
+        for (int i = 1; i <= N; i++) {
+            for (int j = i + 1; j <= N; j++) {
+                int[] fromArr = posArr[i];
+                int[] toArr = posArr[j];
+
+                double dist = Math.sqrt( Math.pow(fromArr[0] - toArr[0] , 2) 
+                                        + Math.pow(fromArr[1] - toArr[1], 2) );
+
+                pq.add(new Edge(i, j, dist));
+            }
+        }
+
         while (!pq.isEmpty()) {
-        	Pos curPos = (Pos)pq.poll();
+            Edge edge = pq.poll();
+            
+            if (!union(edge.from, edge.to)) continue;
 
-        	int from = curPos.from;
-        	int to = curPos.to;
-        	double weight = curPos.weight;
-        	
-        	if (!union(from, to)) continue;
-        	ans += weight;
+            
+            answer += edge.dist;
         }
-        
-        System.out.printf("%.2f", ans);
-    }
-    
-    static class Pos implements Comparable<Pos>{
-    	int from, to;
-    	double weight;
-    	
-    	Pos(int from, int to, double weight) {
-    		this.from = from;
-    		this.to = to;
-    		this.weight = weight;
-    	}
 
-    	public int compareTo(Pos pos) {
-    		return Double.compare(this.weight, pos.weight);
-    	}
-
+        System.out.printf("%.2f", answer);
     }
-    
+
     static int find(int a) {
-    	if (parents[a] == a) return a;
-    	return parents[a] = find(parents[a]);
+        if (a == parents[a]) return a;
+
+        return parents[a] = find(parents[a]);
     }
-    
+
     static boolean union(int a, int b) {
-    	int aRoot = find(a);
-    	int bRoot = find(b);
-    	
-    	if (aRoot == bRoot) return false;
-    	parents[bRoot] = aRoot;
-    	return true;
+        int rootA = find(a);
+        int rootB = find(b);
+
+        if (rootA == rootB) return false;
+
+        parents[rootA] = parents[rootB];
+        return true;
     }
 }
