@@ -36,64 +36,49 @@ class Main {
             }
         }
 
-        boolean[][] visited = new boolean[N][M];
-        
-        int[][] dp = new int[N][M];
-        for (int row = 0; row < N; row++) {
-            for (int col = 0; col < M; col++) dp[row][col] = Integer.MAX_VALUE;
-        }
-        dp[posH[0]][posH[1]] = 0;
-        
+        boolean[][][] visited = new boolean[N][M][2];        
         Deque<int[]> deque = new ArrayDeque<>();
-        Deque<int[]> deque1 = new ArrayDeque<>();
-        deque.add(new int[] {posH[0], posH[1], 0});
+        deque.add(new int[] {posH[0], posH[1], 1, 0});
+        visited[posH[0]][posH[1]][1] = true;
         int answer = Integer.MAX_VALUE;
         
         while (!deque.isEmpty()) {
             int[] cur_arr = deque.pollFirst();
-
+            int isUse = cur_arr[2];
+            
             if (cur_arr[0] == posE[0] && cur_arr[1] == posE[1]) {
-                answer = cur_arr[2];
+                answer = cur_arr[3];
                 break;
             }
+
+            // System.out.println(cur_arr[0] + " " + cur_arr[1]);
             
             for (int i = 0; i < 4; i++) {
                 int new_row = cur_arr[0] + dy[i];
                 int new_col = cur_arr[1] + dx[i];
 
                 if (new_row < 0 || new_row == N || new_col < 0 || new_col == M) continue;
-                if (visited[new_row][new_col]) continue;
-                if (graph[new_row][new_col] == 1) {
-                    deque1.add(new int[] {new_row, new_col, cur_arr[2] + 1});
-                    dp[new_row][new_col] = cur_arr[2] + 1;
-                    visited[new_row][new_col] = true;
+                if (visited[new_row][new_col][isUse]) continue;
+                if (isUse == 1) {
+                    if (graph[new_row][new_col] == 1 && !visited[new_row][new_col][0]) {
+                        deque.add(new int[] {new_row, new_col, 0, cur_arr[3] + 1});
+                        visited[new_row][new_col][0] = true;
+                        visited[new_row][new_col][1] = true;
+                    }
+
+                    if (graph[new_row][new_col] == 0) {
+                        deque.add(new int[] {new_row, new_col, 1, cur_arr[3] + 1});
+                        visited[new_row][new_col][1] = true;
+                    }
                 } else {
-                    deque.add(new int[] {new_row, new_col, cur_arr[2] + 1});
-                    visited[new_row][new_col] = true;
+                    if (graph[new_row][new_col] == 1) continue;
+                    deque.add(new int[] {new_row, new_col, 0, cur_arr[3] + 1});
+                    visited[new_row][new_col][isUse] = true;
                 }
             }
         }
 
-        while (!deque1.isEmpty()) {
-            int[] cur_arr = deque1.pollFirst();
-        
-
-            for (int i = 0; i < 4; i++) {
-                int new_row = cur_arr[0] + dy[i];
-                int new_col = cur_arr[1] + dx[i];
-
-                if (new_row < 0 || new_row == N || new_col < 0 || new_col == M) continue;
-                if (graph[new_row][new_col] == 1) continue;
-                if (dp[new_row][new_col] <= cur_arr[2] + 1) continue;
-                
-                deque1.add(new int[] {new_row, new_col, cur_arr[2] + 1});
-                dp[new_row][new_col] = cur_arr[2] + 1;
-                
-            }
-        }
-        answer = Math.min(answer, dp[posE[0]][posE[1]]);
         if (answer == Integer.MAX_VALUE) System.out.println(-1);
         else System.out.println(answer);
-        
     }
 }
