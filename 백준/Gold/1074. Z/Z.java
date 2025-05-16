@@ -1,60 +1,52 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	static int N, r, c;
-	static int ans = 0;
-	static boolean flg = false;
-	public static void main(String[] args) throws IOException {
-		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		N = Integer.parseInt(st.nextToken());
-		r = Integer.parseInt(st.nextToken());
-		c = Integer.parseInt(st.nextToken());
-		
-		recursion(0, 0, N);
-		
-		System.out.println(ans);
-	}
-	
-	static void recursion(int row, int col, int depth) {
-		int LENGTH = (int)Math.pow(2, depth);
-		int half = LENGTH / 2;
-		if (flg) return;
-		
-		if (row == r && col == c) {
-			flg = true;
-			return;
-		}
-		if (depth == 0) {
-			ans++;
-			return;
-		}
-		// 해당 좌표가 범위 안에 있는지 확인
-		if (!isInsideRange(row, col, LENGTH)) {
-			ans += LENGTH*LENGTH;
-			return;
-		}
-		
-		recursion(row, col, depth - 1);
-		recursion(row, col + half, depth - 1);
-		recursion(row + half, col, depth - 1);
-		recursion(row + half, col + half, depth - 1);
+// The main method must be in a class named "Main".
+class Main {
+    static int N, R, C;
+    static int answer = 0;
+    static int[] drow = new int[] {0, 0, 1, 1};
+    static int[] dcol = new int[] {0, 1, 0, 1};
+    
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-	}
-	
-	static boolean isInsideRange(int row, int col, int LENGTH) {
-		int end_row = row + LENGTH;
-		int end_col = col + LENGTH;
-		if (row <= r && end_row > r &&
-				col <= c && end_col > c) return true;
-		return false;
-	}
+        N = Integer.parseInt(st.nextToken());
+        R = Integer.parseInt(st.nextToken());
+        C = Integer.parseInt(st.nextToken());
 
+        int num = (int)Math.pow(2, N);
+        recursion(0, 0, num, num);
+        System.out.println(answer);
+    }
+
+    static void recursion(int start_row, int start_col, int end_row, int end_col) {
+        if (start_row == R && start_col == C) {
+            return;
+        }
+ 
+        int len = end_row - start_row;
+        int half = len / 2;
+
+        
+        int total = 0;  
+        for (int i = 0; i < 4; i++) {
+            int new_start_row = start_row + drow[i] * half;
+            int new_start_col = start_col + dcol[i] * half;
+            int new_end_row = start_row + half + drow[i] * half;
+            int new_end_col = start_col + half + dcol[i] * half;
+
+            if (new_start_row <= R && new_end_row > R &&
+               new_start_col <= C && new_end_col > C) {
+                recursion(new_start_row, new_start_col, new_end_row, new_end_col);
+                break;
+               }
+
+            total += half * half;
+        }
+
+        answer += total;
+    }
 }
