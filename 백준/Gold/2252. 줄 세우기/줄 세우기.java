@@ -1,66 +1,57 @@
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	
-	public static void main(String[] args) throws IOException {
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		
-		StringTokenizer st = new StringTokenizer(br.readLine());	
-		
-		int N, M;
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
-		
-		int[] count = new int[N + 1];
-		HashMap<Integer, ArrayList<Integer>> graph = new HashMap<>();
-		
-		for (int i = 0; i < M; i++) {
-			st = new StringTokenizer(br.readLine());	
-			
-			int start = Integer.parseInt(st.nextToken());
-			int end = Integer.parseInt(st.nextToken());
-			
-			count[end]++;
-			
-			if (graph.containsKey(start)) {
-				ArrayList<Integer> list = graph.get(start);
-				list.add(end);
-				graph.put(start, list);	
-			}
-			else {
-				ArrayList<Integer> list = new ArrayList<>();
-				list.add(end);
-				graph.put(start, list);	
-			}
-		}
-		
-		Deque<Integer> deque = new LinkedList<>();
-		
-		for (int i = 1; i < N + 1; i++) {
-			if (count[i] == 0) deque.add(i);
-		}
-		StringBuilder sb = new StringBuilder();
-		
-		while(!deque.isEmpty()) {
-			int cur_num = deque.pollFirst();
-			
-			sb.append(cur_num);
-			sb.append(" ");
-			if (!graph.containsKey(cur_num)) continue;
-			ArrayList<Integer> list = graph.get(cur_num);
-			for(int num: list) {
-				count[num]--;
-				if (count[num] == 0) deque.add(num);
-			}
-		}
-		
-		for (int i = 1; i < N + 1; i++) {
-			if (count[i] != 0) sb.append(i);
-		}
-		
-		System.out.println(sb.toString());
-	}
+// The main method must be in a class named "Main".
+class Main {
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
+        int N, M;
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
+
+        int[] countArr = new int[N + 1];
+        ArrayList<Integer>[] graph = new ArrayList[N + 1];
+
+        for (int i = 0; i <= N; i++) graph[i] = new ArrayList<>();
+
+        for (int i = 0; i < M; i++) {
+            st = new StringTokenizer(br.readLine());
+
+            int from = Integer.parseInt(st.nextToken());
+            int to = Integer.parseInt(st.nextToken());
+
+            graph[from].add(to);
+            
+            countArr[to]++;
+        }
+
+        Deque<Integer> deque = new ArrayDeque<>();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i <= N; i++) {
+            if (countArr[i] == 0) {
+                deque.add(i);
+
+                sb.append(i + " ");
+            }
+        }
+
+        
+        
+        while (!deque.isEmpty()) {
+            int no = deque.pollFirst();
+            for (int new_no : graph[no]) {
+
+                countArr[new_no]--;
+                if (countArr[new_no] == 0) {
+                    deque.add(new_no);
+                    sb.append(new_no + " ");
+                }
+            }
+        }
+
+        System.out.println(sb.toString());
+    }
 }
