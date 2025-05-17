@@ -2,47 +2,53 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 
+// The main method must be in a class named "Main".
 class Main {
-    static int N, M;
-    static ArrayList<Integer> chu_list = new ArrayList();
-    static ArrayList<Integer> goo_list = new ArrayList();
-    static boolean[][] memo;
-    
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
 
-        N = Integer.parseInt(st.nextToken());
-        memo = new boolean[40501][N];
-        
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < N; i++) chu_list.add(Integer.parseInt(st.nextToken()));
+        int N = Integer.parseInt(st.nextToken());
+        int[] chuArr = new int[N];
 
         st = new StringTokenizer(br.readLine());
-        M = Integer.parseInt(st.nextToken());
-        
-        st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < M; i++) goo_list.add(Integer.parseInt(st.nextToken()));
-    
-        memo[chu_list.get(0)][0] = true;
-        memo[0][0] = true;
-        
+        for (int i = 0; i < N; i++) chuArr[i] = Integer.parseInt(st.nextToken());
+
+        Deque<Integer> deque = new ArrayDeque<>();
+        deque.add(chuArr[0]);
         for (int i = 1; i < N; i++) {
-            int chu = chu_list.get(i);
-            
-            for (int j = 0; j <= 40500; j++) {
-                if(memo[j][i-1]) {
-                    memo[j][i] = true;
-                    memo[j + chu][i] = true;
-                    memo[Math.abs(j - chu)][i] = true;
-                }
+            HashSet<Integer> tmp = new HashSet<>();
+
+            tmp.add(chuArr[i]);
+            while (!deque.isEmpty()) {
+                int num = deque.pollFirst();
+
+                tmp.add(num);
+                tmp.add(Math.abs(num - chuArr[i]));
+                tmp.add(num + chuArr[i]);
             }
+
+            for (int num : tmp) deque.add(num);
         }
 
-        for (int goo : goo_list) {
-            if (memo[goo][N - 1]) System.out.print("Y ");
-            else System.out.print("N ");
+        boolean[] visited = new boolean[40_001];
+        for (int num : deque) {
+            if (num >= 40_001) continue;
+            visited[num] = true;
         }
+        
+        st = new StringTokenizer(br.readLine());
+        int K = Integer.parseInt(st.nextToken());
+
+        st = new StringTokenizer(br.readLine());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < K; i++) {
+            int num = Integer.parseInt(st.nextToken());
+
+            if (visited[num]) sb.append("Y").append(" ");
+            else sb.append("N").append(" ");
+        }
+
+        System.out.println(sb.toString());
     }
-
 }
