@@ -5,7 +5,6 @@ import java.io.*;
 // The main method must be in a class named "Main".
 class Main {
     static int N;
-    static int[] arr;
     static ArrayList<Integer> list = new ArrayList<>();
     
     public static void main(String[] args) throws IOException{
@@ -13,32 +12,32 @@ class Main {
         StringTokenizer st = new StringTokenizer(br.readLine());
 
         N = Integer.parseInt(st.nextToken());
-        arr = new int[N];
-
         st = new StringTokenizer(br.readLine());
-        for (int i = 0; i < N; i++) arr[i] = Integer.parseInt(st.nextToken());
 
-        list.add(arr[0]);
+        for (int i = 0; i < N; i++) {
+            int num = Integer.parseInt(st.nextToken());
 
-        for (int i = 1; i < N; i++) {
-            int idx = lower_bound(arr[i]);
+            if (list.size() == 0) {
+                list.add(num);
+                continue;
+            }
 
-            
-            if (idx >= list.size()) list.add(arr[i]);
-            else list.set(idx, arr[i]);
+            int idx = binarySearch(num);
+            if (idx < list.size()) list.set(idx, num);
+            else list.add(num);
         }
 
         System.out.println(list.size());
     }
 
-    static int lower_bound(int target) {
+    static int binarySearch(int num) {
         int start = 0;
         int end = list.size() - 1;
 
-        while(start <= end) {
+        while (start <= end) {
             int mid = (start + end) / 2;
 
-            if (list.get(mid) >= target) end = mid - 1;
+            if (num <= list.get(mid)) end = mid - 1;
             else start = mid + 1;
         }
 
