@@ -2,60 +2,66 @@ import java.util.*;
 import java.lang.*;
 import java.io.*;
 
-
+// The main method must be in a class named "Main".
 class Main {
-    static int N;
     static int[][] graph;
-    static int[][] memo;
-    static int[][] direction = {
-        {1, 0},
-        {-1, 0},
-        {0, 1},
-        {0, -1}
-    };
+    static int[][] dp;
+    static boolean[][] visited;
+    static int N;
+    static int[] dy = {1, -1, 0, 0};
+    static int[] dx = {0, 0, 1, -1};
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
+
         N = Integer.parseInt(st.nextToken());
 
         graph = new int[N][N];
-        memo = new int[N][N];
-        for (int row = 0; row < N; row++) {
+        dp = new int[N][N];
+        visited = new boolean[N][N];
+
+        for (int i = 0; i < N; i++) {
             st = new StringTokenizer(br.readLine());
 
-            for (int col = 0; col < N; col++) {
-                graph[row][col] = Integer.parseInt(st.nextToken());
-                memo[row][col] = -1;
+            for (int j = 0; j < N; j++) {
+                graph[i][j] = Integer.parseInt(st.nextToken());
+                dp[i][j] = -1;
             }
         }
-        
-        int ans = 0;
 
+        int answer = 0;
         for (int row = 0; row < N; row++) {
             for (int col = 0; col < N; col++) {
-                ans = Math.max(ans, dp(row, col));
+                visited[row][col] = true;
+                answer = Math.max(answer, dfs(row, col, graph[row][col]));
+                visited[row][col] = false;
             }
         }
 
-        System.out.println(ans);
+        System.out.println(answer);
     }
 
-    static int dp (int row, int col) {
-        if (memo[row][col] != -1) return memo[row][col];
-        
-        int total = 1;
-        for (int[] direct : direction) {
-            int new_row = row + direct[0];
-            int new_col = col + direct[1];
-
-            if (new_row < 0 || new_row == N || new_col < 0 || new_col == N) continue;
-            if (graph[row][col] >= graph[new_row][new_col]) continue;
-
-            total = Math.max(total, dp(new_row, new_col) + 1);
+    static int dfs(int row, int col, int init) {
+        if (dp[row][col] != -1) {
+            return dp[row][col];
         }
+        
+        int result = 1;
+        for (int i = 0; i < 4; i++) {
+            int new_row = row + dy[i];
+            int new_col = col + dx[i];
 
-        memo[row][col] = total;
-        return total;
+            if (new_row < 0 || new_row >= N || new_col < 0 || new_col >= N) continue;
+            if (visited[new_row][new_col]) continue;
+            if (graph[new_row][new_col] <= init) continue;
+
+            visited[new_row][new_col] = true;
+            result = Math.max(result, dfs(new_row, new_col, graph[new_row][new_col]) + 1);
+            visited[new_row][new_col] = false;
+        }
+        
+        dp[row][col] = result;
+        return result;
     }
 }
