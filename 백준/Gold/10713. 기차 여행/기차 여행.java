@@ -20,7 +20,7 @@ class Main {
         railArr = new int[N - 1][3];
         railCount = new int[N - 1];
 
-        int answer = 0;
+        long answer = 0;
 
         st = new StringTokenizer(br.readLine());
         for (int i = 0; i < M; i++) {
@@ -45,8 +45,8 @@ class Main {
         for (int i = 0; i < N - 1; i++) {
             int cnt = railCount[i];
 
-            int value = Math.min(railArr[i][0] * cnt, 
-                                 (railArr[i][1] + railArr[i][2]) + (railArr[i][1] * (cnt - 1)) );
+            long value = Math.min(railArr[i][0] * (long)cnt, 
+                                 (railArr[i][1] + (long)railArr[i][2]) + (railArr[i][1] * (long)(cnt - 1)) );
 
             answer += value;
         }
