@@ -74,7 +74,6 @@ class Main {
                             answer = Math.min(answer, row_len * col_len);
                             continue;
                         }
-                        if (cur_arr1[row][col] == 1) continue;
 
                         boolean flg = false;
 
