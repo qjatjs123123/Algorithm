@@ -1,167 +1,98 @@
-import java.util.*;
-import java.lang.*;
 import java.io.*;
+import java.util.*;
 
-// The main method must be in a class named "Main".
-class Main {
-    static int N1, N2, M1, M2;
-    static int[][] arr1, arr2, arr;
-    
-    public static void main(String[] args) throws IOException{
+public class Main {
+    static int[][] puzzle1, puzzle2;
+    static int N1, M1, N2, M2;
+
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        
+        StringTokenizer st;
+
+        // 첫 번째 퍼즐 입력
+        st = new StringTokenizer(br.readLine());
         N1 = Integer.parseInt(st.nextToken());
         M1 = Integer.parseInt(st.nextToken());
-
-        arr1 = new int[N1][M1];
-        for (int row = 0; row < N1; row++) {
-            st = new StringTokenizer(br.readLine());
-            String str = st.nextToken();
-            
-            for (int col = 0; col < M1; col++) {
-                arr1[row][col] = str.charAt(col) - '0';
+        puzzle1 = new int[N1][M1];
+        for (int i = 0; i < N1; i++) {
+            String line = br.readLine();
+            for (int j = 0; j < M1; j++) {
+                puzzle1[i][j] = line.charAt(j) - '0';
             }
         }
 
+        // 두 번째 퍼즐 입력
         st = new StringTokenizer(br.readLine());
         N2 = Integer.parseInt(st.nextToken());
         M2 = Integer.parseInt(st.nextToken());
-
-        arr2 = new int[N2][M2];
-        for (int row = 0; row < N2; row++) {
-            st = new StringTokenizer(br.readLine());
-            String str = st.nextToken();
-            
-            for (int col = 0; col < M2; col++) {
-                arr2[row][col] = str.charAt(col) - '0';
+        puzzle2 = new int[N2][M2];
+        for (int i = 0; i < N2; i++) {
+            String line = br.readLine();
+            for (int j = 0; j < M2; j++) {
+                puzzle2[i][j] = line.charAt(j) - '0';
             }
         }
 
-        HashMap<Integer, int[][]> dict = new HashMap<>();
-        HashMap<Integer, int[][]> dict1 = new HashMap<>();
-        for (int r = 0; r <= 3; r++) {
-            int[][] copy_arr1 = rotate(arr1, r);
-            int[][] copy_arr2 = rotate(arr2, r);
+        int minArea = Integer.MAX_VALUE;
 
-            dict1.put(r, copy_arr2);
-            dict.put(r, copy_arr1);
-        }
+        // 모든 회전 조합
+        for (int r1 = 0; r1 < 4; r1++) {
+            int[][] p1 = rotate(puzzle1, r1);
+            for (int r2 = 0; r2 < 4; r2++) {
+                int[][] p2 = rotate(puzzle2, r2);
 
-        int answer = Integer.MAX_VALUE;
+                int h1 = p1.length, w1 = p1[0].length;
+                int h2 = p2.length, w2 = p2[0].length;
 
-        for (int r1 = 0; r1 <= 3; r1++) {
-            int[][] cur_arr1 = dict.get(r1);
-
-            for (int row = 0; row < cur_arr1.length + 1; row++) {
-                for (int col = 0; col < cur_arr1[0].length + 1; col++) {
-                    
-                    for (int r2 = 0; r2 <= 3; r2++) {
-                        int[][] cur_arr2 = dict1.get(r2);
-
-
-                        if (row == cur_arr1.length) {
-                            int row_len = row + cur_arr2.length;
-                            int col_len = Math.max(cur_arr1[0].length, cur_arr2[0].length);
-                            
-                            answer = Math.min(answer, row_len * col_len);
-                            continue;
-                        }
-                        if (col == cur_arr1[0].length) {
-                            int row_len = Math.max(cur_arr1.length, cur_arr2.length);
-                            int col_len = col + cur_arr2[0].length;
-
-                            answer = Math.min(answer, row_len * col_len);
-                            continue;
-                        }
-
-                        boolean flg = false;
-
-                        for (int r = 0; r < cur_arr2.length; r++) {
-                            for (int c = 0; c < cur_arr2[0].length; c++) {
-                                int new_row = row + r;
-                                int new_col = col + c;
-
-                                if (new_row >= cur_arr1.length) continue;
-                                if (new_col >= cur_arr1[0].length) continue;
-
-                                if (cur_arr1[new_row][new_col] == 1 && 
-                                   cur_arr2[r][c] == 1) {
-                                    flg = true;
-                                   }
-                            }
-                        }
-
-                        if (!flg) {
-                            int row_len = Math.max(cur_arr1.length, row + cur_arr2.length);
-                            int col_len = Math.max(cur_arr1[0].length, col + cur_arr2[0].length);
-
-                            
-                            answer = Math.min(answer, row_len * col_len);
+                // 모든 상대 위치 탐색 (위치 차이 dx, dy)
+                for (int dy = -h2; dy <= h1; dy++) {
+                    for (int dx = -w2; dx <= w1; dx++) {
+                        if (canPlace(p1, p2, dx, dy)) {
+                            int top = Math.min(0, dy);
+                            int left = Math.min(0, dx);
+                            int bottom = Math.max(h1, dy + h2);
+                            int right = Math.max(w1, dx + w2);
+                            int area = (bottom - top) * (right - left);
+                            minArea = Math.min(minArea, area);
                         }
                     }
-
-                    
                 }
             }
         }
-        
-        System.out.println(answer);
+
+        System.out.println(minArea);
     }
 
-    static boolean check(int s_row, int s_col, int[][] copy_arr2) {
-        for (int row = 0; row < copy_arr2.length; row++) {
-            for (int col = 0; col < copy_arr2[0].length; col++) {
-                
-                int r = row + s_row;
-                int c = col + s_col;
-                if (copy_arr2[row][col] == 1 && arr[r][c] == 1) return false;
+    // 퍼즐 회전 (90도 단위)
+    static int[][] rotate(int[][] puzzle, int times) {
+        int[][] result = puzzle;
+        for (int t = 0; t < times; t++) {
+            int h = result.length, w = result[0].length;
+            int[][] rotated = new int[w][h];
+            for (int i = 0; i < h; i++) {
+                for (int j = 0; j < w; j++) {
+                    rotated[j][h - 1 - i] = result[i][j];
+                }
+            }
+            result = rotated;
+        }
+        return result;
+    }
+
+    // 퍼즐 p2가 p1과 dx, dy 차이로 겹치지 않고 놓일 수 있는가
+    static boolean canPlace(int[][] p1, int[][] p2, int dx, int dy) {
+        int h1 = p1.length, w1 = p1[0].length;
+        int h2 = p2.length, w2 = p2[0].length;
+
+        for (int i = 0; i < h2; i++) {
+            for (int j = 0; j < w2; j++) {
+                if (p2[i][j] == 0) continue;
+                int y = i + dy, x = j + dx;
+                if (y >= 0 && y < h1 && x >= 0 && x < w1) {
+                    if (p1[y][x] == 1) return false; // 겹침
+                }
             }
         }
-
         return true;
-    }
-    
-    static int[][] deepCopy(int[][] arr) {
-        int[][] new_arr = new int[arr.length][arr[0].length];
-
-        for (int row = 0; row < arr.length; row++) {
-            for (int col = 0; col < arr[0].length; col++) {
-                new_arr[row][col] = arr[row][col];
-            }
-        }
-
-        return new_arr;
-    }
-
-    static int[][] rotate(int[][] arr, int cnt) {
-        int[][] new_arr = deepCopy(arr);
-
-        for (int rotate = 0; rotate < cnt; rotate++) {
-            int[][] tmp = new int[new_arr[0].length][new_arr.length];
-
-            for (int row = 0; row < new_arr.length; row++) {
-                for (int col = 0; col < new_arr[0].length; col++) {
-                    tmp[col][ new_arr.length - row - 1 ] = new_arr[row][col];
-                }
-            }
-
-            new_arr = tmp;
-        }
-
-        return new_arr;
-    }
-    
-    static void display(int[][] arr) {
-        StringBuilder sb = new StringBuilder();
-
-        for (int row = 0; row < arr.length; row++) {
-            for (int col = 0; col < arr[0].length; col++) {
-                sb.append(arr[row][col]).append(" ");
-            }
-            sb.append("\n");
-        }
-
-        System.out.println(sb.toString());
     }
 }
