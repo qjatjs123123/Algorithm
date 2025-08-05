@@ -52,7 +52,7 @@ class Main {
         while (start <= end) {
             long mid = (start + end) / 2;
 
-            boolean result = bfs(mid);
+            boolean result = dijkstra(mid);
 
             if (!result) start = mid + 1;
             else end = mid - 1;
@@ -62,6 +62,33 @@ class Main {
         else System.out.println(start);
     }
 
+    static boolean dijkstra(long mid) {
+
+        long[] distance = new long[N + 1]; 
+        for (int i = 0; i <= N; i++) distance[i] = Long.MAX_VALUE;
+        
+        PriorityQueue<long[]> pq = new PriorityQueue<>((a, b) -> Long.compare(a[0], b[0]));
+        pq.add(new long[] {0, A});
+
+        while (!pq.isEmpty()) {
+            long[] cur_arr = pq.poll();
+
+            if (distance[(int)cur_arr[1]] < cur_arr[0]) continue;
+
+            ArrayList<Edge> list = graph[ (int)cur_arr[1] ];
+            for (Edge edge : list) {
+                if (edge.dist > mid) continue;
+                if (distance[edge.no] <= cur_arr[0] + edge.dist) continue;
+
+                distance[edge.no] = cur_arr[0] + edge.dist;
+                pq.add(new long[] {cur_arr[0] + edge.dist, edge.no});
+            }
+        }
+
+        if (distance[B] <= C) return true;
+        return false;
+    }
+    
     static boolean bfs(long mid) {
         boolean[] visited = new boolean[N + 1];
 
