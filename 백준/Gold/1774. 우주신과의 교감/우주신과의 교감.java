@@ -5,85 +5,93 @@ import java.io.*;
 // The main method must be in a class named "Main".
 class Main {
     static int N, M;
-    static PriorityQueue<Edge> pq = new PriorityQueue<>();
-    static int[][] posArr;
     static int[] parents;
+    static Pos[] posArr;
     
-    static class Edge implements Comparable<Edge> {
+    static class Pos {
+        int x, y;
+        Pos(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }   
+
+    static class Edge implements Comparable<Edge>{
         int from, to;
         double dist;
 
-        Edge(int from, int to, double dist) {
+        Edge(int from, int to) {
             this.from = from;
             this.to = to;
-            this.dist = dist;
+
+            dist = Math.sqrt( Math.pow( posArr[from].x - posArr[to].x, 2 ) + 
+                            Math.pow( posArr[from].y - posArr[to].y, 2 ));
         }
 
-        @Override
-        public int compareTo(Edge o) {
-            return Double.compare(this.dist, o.dist);
-        } 
+        public int compareTo(Edge edge) {
+            if (this.dist > edge.dist) return 1;
+            else if (this.dist == edge.dist) return 0;
+            else return -1;
+        }
     }
     
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-
+        
         N = Integer.parseInt(st.nextToken());
         M = Integer.parseInt(st.nextToken());
 
-        posArr = new int[N + 1][2];
+        parents = new int[N + 1];
+        for (int i = 0; i <= N; i++) parents[i] = i;
+
+        posArr = new Pos[N + 1];
         for (int i = 1; i <= N; i++) {
             st = new StringTokenizer(br.readLine());
+            int x = Integer.parseInt(st.nextToken());
+            int y = Integer.parseInt(st.nextToken());
 
-            int X = Integer.parseInt(st.nextToken());
-            int Y = Integer.parseInt(st.nextToken());
-
-            posArr[i][0] = X;
-            posArr[i][1] = Y;
+            posArr[i] = new Pos(x, y);
         }
 
-        parents = new int[N + 1];
-        for (int i = 1; i <= N; i++) parents[i] = i;
+        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        for (int i = 1; i <= N; i++) {
+            for (int j = i + 1; j <= N; j++) {
+                pq.add(new Edge(i, j));
+            }
+        }
 
+        int K = 0;
         for (int i = 0; i < M; i++) {
             st = new StringTokenizer(br.readLine());
 
             int from = Integer.parseInt(st.nextToken());
             int to = Integer.parseInt(st.nextToken());
 
-            union(from, to);
-        }
-
-        double answer = 0;
-        for (int i = 1; i <= N; i++) {
-            for (int j = i + 1; j <= N; j++) {
-                int[] fromArr = posArr[i];
-                int[] toArr = posArr[j];
-
-                double dist = Math.sqrt( Math.pow(fromArr[0] - toArr[0] , 2) 
-                                        + Math.pow(fromArr[1] - toArr[1], 2) );
-
-                pq.add(new Edge(i, j, dist));
+            if (union(from, to)) {
+                K++;
             }
         }
 
+        double answer = 0;
         while (!pq.isEmpty()) {
+            if (K == N - 1) break;
+            
             Edge edge = pq.poll();
             
-            if (!union(edge.from, edge.to)) continue;
-
-            
-            answer += edge.dist;
+            if (union(edge.from, edge.to)) {
+                answer += edge.dist;
+                K++;
+            }
         }
 
-        System.out.printf("%.2f", answer);
+        System.out.printf("%.2f",answer);
     }
 
-    static int find(int a) {
-        if (a == parents[a]) return a;
+    static int find(int node) {
+        if (parents[node] == node) return node;
 
-        return parents[a] = find(parents[a]);
+        return parents[node] = find(parents[node]);
     }
 
     static boolean union(int a, int b) {
