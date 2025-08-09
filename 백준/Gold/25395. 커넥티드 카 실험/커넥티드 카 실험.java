@@ -29,45 +29,33 @@ class Main {
         Deque<Integer> deque = new ArrayDeque<>();
         deque.add(S - 1);
         visited[S - 1] = true;
-        TreeSet<Integer> ts = new TreeSet<>();
-        for (int i = 0; i < N; i++) ts.add(i);
-        ts.remove(S - 1);
 
         while (!deque.isEmpty()) {
             int cur_idx = deque.pollFirst();
             int cur_oil = oilArr[cur_idx];
 
             int right = posArr[cur_idx] + cur_oil;
-            int right_idx = cur_idx;
-            while (true) {
-                Integer new_idx = ts.higher(right_idx);
-                if (new_idx == null) break;
-                if (posArr[new_idx] > right) break;
+            int right_idx = upper_bound(right);
 
-                deque.add(new_idx);
-                ts.remove(new_idx);
-                visited[new_idx] = true;
-                right_idx = new_idx;
+            for (int i = cur_idx + 1; i < right_idx; i++) {
+                if (visited[i]) continue;
+
+                visited[i] = true;
+                deque.add(i);
             }
 
             int left = posArr[cur_idx] - cur_oil;
-            int left_idx = cur_idx;
-            while (true) {
-                Integer new_idx = ts.lower(left_idx);
-                
-                if (new_idx == null) break;
-                if (posArr[new_idx] < left) break;
+            int left_idx = lower_bound(left);
 
-                deque.add(new_idx);
-                ts.remove(new_idx);
-                visited[new_idx] = true;
-                left_idx = new_idx;
+            for (int i = left_idx; i < cur_idx; i++) {
+                if (visited[i]) continue;
+
+                visited[i] = true;
+                deque.add(i);
             }
-            
         }
 
         StringBuilder sb = new StringBuilder();
-        
         for (int i = 0; i < N; i++) {
             if (visited[i]) {
                 sb.append((i + 1) + " ");
