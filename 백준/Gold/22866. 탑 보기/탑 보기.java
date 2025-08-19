@@ -9,90 +9,79 @@ class Main {
         StringTokenizer st = new StringTokenizer(br.readLine());
 
         int N = Integer.parseInt(st.nextToken());
+        int[] heightArr = new int[N + 1];
+        int[] countArr = new int[N + 1];
+        PriorityQueue<int[]>[] idxArr = new PriorityQueue[N + 1];
 
-        st = new StringTokenizer(br.readLine());
-        int[] buildingHeight = new int[N];
-        for (int i = 0; i < N; i++) buildingHeight[i] = Integer.parseInt(st.nextToken());
-
-        int[] countArr = new int[N];
-        int[] nodeArr = new int[N];
-        for (int i = 0; i < N; i++) nodeArr[i] = 999_999_999;
-
+        for (int i = 0; i <= N; i++) idxArr[i] = new PriorityQueue<>((a, b) -> {
+            if (a[0] == b[0]) return a[1] - b[1];
+            return a[0] - b[0];
+        });
         
         Stack<int[]> stack = new Stack<>();
+        StringBuilder sb = new StringBuilder();
         
-        for (int i = 0; i < N; i++) {
-            int height = buildingHeight[i];
+        st = new StringTokenizer(br.readLine());
+        for (int i = 1; i <= N; i++) {
+            heightArr[i] = Integer.parseInt(st.nextToken());
+        }
+        
+        
+        for (int i = 1; i <= N; i++) {
+            int height = heightArr[i];
 
-            if (stack.isEmpty()) {
-                stack.push(new int[] {height, i});
-                continue;
-            }
-
-            if (stack.peek()[0] > height) {
-                nodeArr[i] = stack.peek()[1];
-                countArr[i] = stack.size();
-                stack.push(new int[] {height, i});
-            } else {
-                while (!stack.isEmpty() && stack.peek()[0] <= height) {
-                    stack.pop();
+            if (stack.isEmpty()) stack.push(new int[] {height, i});
+            else {
+                while (!stack.isEmpty()) {
+                    int[] topArr = stack.peek();
+                    
+                    if (topArr[0] > height) {
+                        idxArr[i].add(new int[] {Math.abs(i - topArr[1]), topArr[1]});
+                        break;
+                    } else {
+                        stack.pop();
+                    }
+                    
                 }
 
-                if (stack.size() != 0) {
-                    nodeArr[i] = stack.peek()[1];
-                    countArr[i] = stack.size();
-                }
-
-                stack.push(new int[] {height , i});
+                countArr[i] += stack.size();
+                stack.push(new int[] {height, i});
             }
         }
+
 
         stack.clear();
+        for (int i = N; i > 0; i--) {
+            int height = heightArr[i];
 
-        for (int i = N - 1; i >= 0; i--) {
-            int height = buildingHeight[i];
-            // System.out.println(stack.size());
-            if (stack.isEmpty()) {
-                stack.push(new int[] {height, i});
-                continue;
-            }
-
-            if (stack.peek()[0] > height) {
-                if (nodeArr[i] == 999_999_999) {
-                    nodeArr[i] = stack.peek()[1];
-                } else {
-                    int base_len = Math.abs(nodeArr[i] - i);
-                    int new_len = Math.abs(stack.peek()[1] - i);
-
-                    if (base_len > new_len) nodeArr[i] = stack.peek()[1];
-                }
-                      
-                countArr[i] += stack.size();
-                stack.push(new int[] {height, i});
-            } else {
-                while (!stack.isEmpty() && stack.peek()[0] <= height) {
-                    stack.pop();
-                }
-
-                if (stack.size() != 0) {
-                    if (nodeArr[i] == 999_999_999) {
-                        nodeArr[i] = stack.peek()[1];
+            if (stack.isEmpty()) stack.push(new int[] {height, i});
+            else {
+                while (!stack.isEmpty()) {
+                    int[] topArr = stack.peek();
+                    
+                    if (topArr[0] > height) {
+                        idxArr[i].add(new int[] {Math.abs(i - topArr[1]), topArr[1]});
+                        break;
                     } else {
-                        int base_len = Math.abs(nodeArr[i] - i);
-                        int new_len = Math.abs(stack.peek()[1] - i);
-    
-                        if (base_len > new_len) nodeArr[i] = stack.peek()[1];
+                        stack.pop();
                     }
+                    
                 }
+
                 countArr[i] += stack.size();
-                stack.push(new int[] {height , i});
+                stack.push(new int[] {height, i});
             }
         }
-        
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < N; i++) {
-            if(nodeArr[i] == 999_999_999) sb.append(0).append("\n");
-            else sb.append(countArr[i]).append(" ").append(nodeArr[i] + 1).append("\n");
+
+        for (int i = 1; i <= N; i++) {
+            
+            if (idxArr[i].isEmpty()) sb.append(0);
+            else {
+                int[] a = idxArr[i].poll();
+                sb.append(countArr[i] + " " + a[1]);
+            }
+
+            sb.append("\n");
         }
         System.out.println(sb.toString());
     }
