@@ -1,92 +1,95 @@
-
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	static int[][] graph = new int[10][10];
-	static int[] num = new int[6];
-	static int ans = Integer.MAX_VALUE;
-	
-    public static void main(String[] args) throws IOException {
+// The main method must be in a class named "Main".
+class Main {
+    static int[] rectCountArr = new int[] {5, 5, 5, 5, 5, 5};
+    static int[][] graph = new int[10][10];
+    static int count = 0;
+    static int answer = Integer.MAX_VALUE;
+    
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//    	BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-    	for (int i = 0; i <= 5; i++) num[i] = 5;
-    	
-    	int oneCnt = 0;
-    	
+
         for (int row = 0; row < 10; row++) {
-        	StringTokenizer st = new StringTokenizer(br.readLine());
-        	for (int col = 0; col < 10; col++) {
-        		graph[row][col] = Integer.parseInt(st.nextToken());
-        		
-        		if (graph[row][col] == 1) oneCnt++;
-        	}
+            StringTokenizer st = new StringTokenizer(br.readLine());
+
+            for (int col = 0; col < 10; col++) graph[row][col] = Integer.parseInt(st.nextToken());
         }
+
+        backtracking(0, 0);
+
+        if (answer == Integer.MAX_VALUE) System.out.println(-1);
+        else System.out.println(answer);
         
-        backtracking(oneCnt, 0, 0);
-        if (ans == Integer.MAX_VALUE) System.out.println(-1);
-        else System.out.println(ans);
+        // StringBuilder sb = new StringBuilder();
+        // for (int i = 0; i < 10; i++) {
+        //     for (int j = 0; j < 10; j++) sb.append(graph[i][j]).append(" ");
+        //     sb.append("\n");
+        // }
+        // System.out.println(sb.toString());
+    }
+
+    static void backtracking(int row, int col) {
+        if (row == 10) {
+            answer = Math.min(answer, count);
+            return;
+        }
+
+        if (col == 10) {
+            backtracking(row + 1, 0);
+            return;
+        }
+
+
+        if (graph[row][col] == 1) {
+            boolean flg = false;
+            for (int len = 1; len <= 5; len++) {
+                if (rectCountArr[len] == 0) continue;
+                boolean result = isRect(row, col, len);
+  
+                if (result) {
+                    rectCountArr[len]--;
+                    change(row, col, len, 0);
+                    count++;
+                    flg = true;
+                    backtracking(row, col + 1);
+                    rectCountArr[len]++;
+                    change(row, col, len, 1);
+                    count--;
+
+                }
+            }
+            
+        } else {
+            backtracking(row, col + 1);
+        }
+    }
+
+    static void change(int row, int col, int len, int num) {
+        int end_row = row + len;
+        int end_col = col + len;
+
+        for (int r = row; r < end_row; r++) {
+            for (int c = col; c < end_col; c++) {
+                graph[r][c] = num;
+            }
+        }
     }
     
-    static void backtracking(int cnt, int prev_row, int prev_col) {
-    	boolean flg = false;
-    	if (cnt < 0) return;
-    	if (cnt == 0) {
-    		int total = 0;
-    		for (int n : num) total += (5 - n);
-    		ans = Math.min(ans, total);
-    		return;
-    	}
-    	
-    	for (int row = 0; row < 10; row++) {
-    		for (int col = 0; col < 10; col++) {
-    			if (graph[row][col] == 0) continue;
-    			// 1~5까지 색종이 붙힐 수 있는지 확인
-    			for (int n = 1; n <= 5; n++) {
-    				//개수 확인
-    				if (num[n] == 0) continue;
-    				
-    				//정사각형인지 확인
-    				if (isSquare(row, col, n)) {
-    					convert(row,col,n,0);
-    					num[n] -= 1;
-    					backtracking(cnt - n*n, row,col);
-    					num[n] += 1;
-    					convert(row,col,n,1);
-    					flg = true;
-    				}
-    				
-    			}
-    			if (flg) break;
-    		}
-    		if (flg) break;
-    	}
+    static boolean isRect(int row, int col, int len) {
+        int end_row = row + len;
+        int end_col = col + len;
+
+        if (end_row > 10 || end_col > 10) return false;
+
+        for (int r = row; r < end_row; r++) {
+            for (int c = col; c < end_col; c++) {
+                if (graph[r][c] == 0) return false;
+            }
+        }
+
+        return true;
     }
-    
-    static boolean isSquare(int row, int col, int n) {
-    	int cnt = 0;
-    	boolean flg = false;
-    	for (int r = row; r < Math.min(10, row + n); r++) {
-    		for (int c = col; c < Math.min(10, col + n); c++) {
-    			if (graph[r][c] == 1) cnt++;
-    			if (graph[r][c] == 0) {
-    				flg = true;
-    				break;
-    			}
-    		}
-    		if (flg) break;
-    	}
-    	
-    	if (cnt == n*n) return true;
-    	return false;
-    }
-    
-    static void convert(int row, int col, int n, int target) {
-    	for (int r = row; r < Math.min(10, row + n); r++) {
-    		for (int c = col; c < Math.min(10, col + n); c++) {
-    			graph[r][c] = target;
-    		}
-    	}
-    }
-    
 }
