@@ -4,49 +4,42 @@ import java.io.*;
 
 // The main method must be in a class named "Main".
 class Main {
-    static int N, K;
-    static int[] arr;
-    
     public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine());
-
-        N = Integer.parseInt(st.nextToken());
-        K = Integer.parseInt(st.nextToken());
-        arr = new int[N];
-        int sum = 0;
+        
+        int N = Integer.parseInt(st.nextToken());
+        int K = Integer.parseInt(st.nextToken());
+        int[] graph = new int[N];
+        int total = 0;
         
         st = new StringTokenizer(br.readLine());
         for (int i = 0; i < N; i++) {
-            arr[i] = Integer.parseInt(st.nextToken());
-            sum += arr[i];
+            graph[i] = Integer.parseInt(st.nextToken());
+            total += graph[i];
         }
 
-        int start = 1;
-        int end = sum;
-        int answer = 0;
-        
-        while (start <= end) {
-            int mid = (start + end) / 2;
+        int left = 0;
+        int right = total;
+
+        while (left <= right) {
+            int mid = (left + right) / 2;
             int groupCnt = 0;
             int cur_sum = 0;
 
-            for (int num : arr) {
-                cur_sum += num;
-            
-                if (mid <= cur_sum) {
-                    
+            for (int score : graph) {
+                cur_sum += score;
+
+                if (cur_sum >= mid) {
                     groupCnt++;
                     cur_sum = 0;
                 }
             }
 
-            if (cur_sum >= mid) groupCnt++;
-            
-            if (groupCnt >= K) start = mid + 1;
-            else end = mid - 1;
-            
+            if (groupCnt < K) right = mid - 1;
+            else left = mid + 1;
         }
-        System.out.println(end);
+
+        System.out.println(left - 1);
     }
 }
