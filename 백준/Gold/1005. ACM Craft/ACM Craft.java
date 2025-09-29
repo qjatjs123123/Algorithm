@@ -1,87 +1,70 @@
-
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	static int T, N, K;
-	static int[] TIME;
-	static HashMap<Integer, ArrayList<Integer>> graph;
-	static int[] dp;
-	static int[] count;
-	
-	public static void main(String[] args) throws IOException {
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
+// The main method must be in a class named "Main".
+class Main {
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-		T = Integer.parseInt(st.nextToken());
+        int T = Integer.parseInt(st.nextToken());
+        StringBuilder sb = new StringBuilder();
+        
+        for (int tc = 0; tc < T; tc++) {
+            st = new StringTokenizer(br.readLine());
+            int N = Integer.parseInt(st.nextToken());
+            int K = Integer.parseInt(st.nextToken());
 
-		for (int t = 1; t <= T; t++) {
-			st = new StringTokenizer(br.readLine());
-			N = Integer.parseInt(st.nextToken());
-			K = Integer.parseInt(st.nextToken());
-			TIME = new int[N + 1];
-			dp = new int[N + 1];
-			count = new int[N + 1];
-			graph = new HashMap<>();
-			
-			st = new StringTokenizer(br.readLine());
-			for (int i = 1; i <= N; i++) TIME[i] = Integer.parseInt(st.nextToken());
-			
-			for (int i = 0; i < K; i++) {
-				st = new StringTokenizer(br.readLine());
-				
-				int from = Integer.parseInt(st.nextToken());
-				int to = Integer.parseInt(st.nextToken());
-				
-				if (graph.containsKey(from)) {
-					ArrayList<Integer> list = graph.get(from);
-					list.add(to);
-					graph.put(from, list);
-				} else {
-					ArrayList<Integer> list = new ArrayList<>();
-					list.add(to);
-					graph.put(from, list);
-				}
-				
-				count[to]++;
-			}
-			
-			st = new StringTokenizer(br.readLine());
-			int target = Integer.parseInt(st.nextToken());
-			
-			Deque<Integer> deque = new LinkedList<>();
-			
-			// init
-			for (int i = 1; i <= N; i++) {
-				if (count[i] == 0) {
-					deque.add(i);
-					dp[i] = TIME[i];
-				}
-			}
-			
-			while (!deque.isEmpty()) {
-				int cur_node = deque.pollFirst();
-				// 종료 조건
-				if (count[target] == 0) break;
-				
-				if (!graph.containsKey(cur_node)) continue;
-				
-				ArrayList<Integer> new_list = graph.get(cur_node);
-				
-				for (int new_node : new_list) {
-					dp[new_node] = Math.max(dp[new_node], dp[cur_node] + TIME[new_node]);
-					
-					count[new_node] -= 1;
-					if (count[new_node] == 0) {
-						deque.add(new_node);
-					}
-				}
-			}
-			
-			System.out.println(dp[target]);
-		}
+            int[] times = new int[N + 1];
+            int[] counts = new int[N + 1];
+            int[] dp = new int[N + 1];
+            ArrayList<Integer>[] graph = new ArrayList[N + 1];
+            
+            
+            st = new StringTokenizer(br.readLine());
+            for (int i = 1; i <= N; i++) {
+                times[i] = Integer.parseInt(st.nextToken());
+                dp[i] = times[i];
+                graph[i] = new ArrayList<>();
+            }
 
-	}
+            for (int i = 0; i < K; i++) {
+                st = new StringTokenizer(br.readLine());
+
+                int from = Integer.parseInt(st.nextToken());
+                int to = Integer.parseInt(st.nextToken());
+
+                graph[from].add(to);
+                counts[to]++;
+            }
+
+            st = new StringTokenizer(br.readLine());
+            int W = Integer.parseInt(st.nextToken());
+
+            Deque<Integer> deque = new ArrayDeque<>();
+            for (int i = 1; i <= N; i++) {
+                if (counts[i] == 0) {
+                    deque.add(i);
+                    dp[i] = times[i];
+                }
+            }
+
+            while (!deque.isEmpty()) {
+                int cur_node = deque.pollFirst();
+
+                ArrayList<Integer> list = graph[cur_node];
+                for (int new_node : list) {
+                    counts[new_node]--;
+
+                    dp[new_node] = Math.max(dp[new_node], times[new_node] + dp[cur_node]);
+                    if (counts[new_node] == 0) deque.add(new_node);
+                }
+            }
+
+            sb.append(dp[W]).append("\n");
+        }
+
+        System.out.println(sb.toString());
+    }
 }
-
