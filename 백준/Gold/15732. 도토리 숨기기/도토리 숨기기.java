@@ -5,55 +5,65 @@ import java.io.*;
 // The main method must be in a class named "Main".
 class Main {
     static int N, K, D;
-    static Rule[] ruleArr;
-    static class Rule {
-        int boxA, boxB, gap;
+    static class FastScanner {
+        BufferedReader br;
+        StringTokenizer st;
 
-        Rule(int boxA, int boxB, int gap) {
-            this.boxA = boxA;
-            this.boxB = boxB;
-            this.gap = gap;
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return st.nextToken();
+        }
+
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
         }
     }
     
     public static void main(String[] args) throws IOException{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+        FastScanner fs = new FastScanner();
 
-        N = Integer.parseInt(st.nextToken());
-        K = Integer.parseInt(st.nextToken());
-        D = Integer.parseInt(st.nextToken());
-        ruleArr = new Rule[K];
+        N = fs.nextInt();
+        K = fs.nextInt();
+        D = fs.nextInt();
+        int[][] graph = new int[K][3];
+        int left = Integer.MAX_VALUE;
+        int right = 0;
         
         for (int i = 0; i < K; i++) {
-            st = new StringTokenizer(br.readLine());
+            int A = fs.nextInt();
+            int B = fs.nextInt();
+            int C = fs.nextInt();
 
-            int boxA = Integer.parseInt(st.nextToken());
-            int boxB = Integer.parseInt(st.nextToken());
-            int gap = Integer.parseInt(st.nextToken());
+            graph[i][0] = A;
+            graph[i][1] = B;
+            graph[i][2] = C;
 
-            ruleArr[i] = new Rule(boxA, boxB, gap);
+            left = Math.min(left, A);
+            right = Math.max(right, B);
         }
 
-        int start = 1;
-        int end = N;
 
-        while (start <= end) {
-            int mid = (start + end) / 2;
-            long count = 0;
+        while (left <= right) {
+            int mid = (left + right) / 2;
 
-            for (Rule rule : ruleArr) {
-                if (rule.boxA > mid) continue;
+            long tmp = 0;
+            for (int i = 0; i < K; i++) {
+                int[] arr = graph[i];
 
-                int dist = Math.min(rule.boxB, mid) - rule.boxA;
-                count += (dist / rule.gap) + 1;
+                int gap = Math.min(mid,arr[1]) - arr[0];
+                if (gap < 0) continue;
+                
+                tmp += (gap / arr[2]) + 1;
             }
 
-            if (count >= D) end = mid - 1;
-            else start = mid + 1;
-            // System.out.println(mid + " " + count);
+            if (tmp >= D) right = mid - 1;
+            else left = mid + 1;
         }
 
-        System.out.println(start);
+        System.out.println(left);
     }
 }
