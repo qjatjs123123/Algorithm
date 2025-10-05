@@ -1,78 +1,86 @@
-
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main{
-	static int N, M;
-	static int[][] graph;
-	static int[][] direction = {
-			{1, 0},
-			{-1, 0},
-			{0, 1},
-			{0, -1}
-	};
-	static int key = 1;
-	public static void main(String[] args) throws IOException {
-		//BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		N = Integer.parseInt(st.nextToken());
-		M = Integer.parseInt(st.nextToken());
-		graph = new int[N][M];
-		
-		for (int row = 0; row < N; row++) {
-			String[] colList = br.readLine().split("");
-			for (int col = 0; col < M; col++) {
-				graph[row][col] = Integer.parseInt(colList[col]);
-			}
-		}
+// The main method must be in a class named "Main".
+class Main {
+    static int N, M;
+    static int[][] graph;
+    static boolean[][][] visited;
+    
+    static class FastScanner {
+        BufferedReader br;
+        StringTokenizer st;
 
-		boolean[][][] visited = new boolean[2][N][M]; 
-		
-		Deque<int[]> deque = new LinkedList<>();
-		deque.add(new int[] {0, 0, 0, 0});
-		boolean flg= true;
-		visited[0][0][0] = true;
-		
-		while (!deque.isEmpty()) {
-			int[] tmp = deque.poll();
-			
-			int cur_row = tmp[0];
-			int cur_col = tmp[1];
-			int cur_cnt = tmp[2];
-			int cur_key = tmp[3];
-			
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
 
-			if (cur_row == N - 1 && cur_col == M - 1) {
-				System.out.println(cur_cnt + 1);
-				flg = false;
-				break;
-			}
-			
-			for (int[] direct : direction) {
-				int new_row = cur_row + direct[0];
-				int new_col = cur_col + direct[1];
-				
-				if (new_row < 0 || new_row == N || new_col < 0 || new_col == M) continue;
-				if (visited[cur_key][new_row][new_col]) continue;
-				
-				if (graph[new_row][new_col] == 1 && cur_key == 1) continue;
-				
-				if (graph[new_row][new_col] == 1) {
-					deque.add(new int[] {new_row, new_col, cur_cnt + 1, 1});
-					visited[cur_key][new_row][new_col] = true;
-				} else {
-					deque.add(new int[] {new_row, new_col, cur_cnt + 1, cur_key});
-					visited[cur_key][new_row][new_col] = true;
-				}
-				
-				
-			}
-		}
-		
-	if (flg) System.out.println(-1); 
-	}
+        String next() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return st.nextToken();
+        }
 
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+    
+    public static void main(String[] args) throws IOException{
+        FastScanner fs = new FastScanner();
+        N = fs.nextInt();
+        M = fs.nextInt();
+
+        graph = new int[N][M];
+
+        for (int row = 0; row < N; row++) {
+            String str = fs.next();
+
+            for (int col = 0; col < M; col++) graph[row][col] = str.charAt(col) - '0';
+        }
+        
+        visited = new boolean[N][M][2];
+
+        Deque<int[]> deque = new ArrayDeque<>();
+        deque.add(new int[] {0, 0, 0, 1});
+        visited[0][0][0] = true;
+        int[] dy = new int[] {1, -1, 0, 0};
+        int[] dx = new int[] {0, 0, 1, -1};
+        
+        while (!deque.isEmpty()) {
+            int[] cur_arr = deque.pollFirst();
+
+            int cur_row = cur_arr[0];
+            int cur_col = cur_arr[1];
+            int cur_idx = cur_arr[2];
+            int cur_dist = cur_arr[3];
+
+            
+            if (cur_row == N - 1 && cur_col == M - 1) {
+                System.out.println(cur_dist);
+                return;
+            }
+            
+            for (int i = 0; i < 4; i++) {
+                int new_row = cur_row + dy[i];
+                int new_col = cur_col + dx[i];
+                
+                if (new_row < 0 || new_row == N || new_col < 0 || new_col == M) continue;
+
+                if (graph[new_row][new_col] == 1) {
+                    if (cur_idx == 0) {
+                        if (visited[new_row][new_col][1]) continue;
+                        visited[new_row][new_col][1] = true;
+                        deque.add(new int[] {new_row, new_col, 1, cur_dist + 1});
+                    }
+                } else {
+                    if (visited[new_row][new_col][cur_idx]) continue;
+                    visited[new_row][new_col][cur_idx] = true;
+                    deque.add(new int[] {new_row, new_col, cur_idx, cur_dist + 1});
+                }
+             }
+        }
+
+        System.out.println(-1);
+    }
 }
-
