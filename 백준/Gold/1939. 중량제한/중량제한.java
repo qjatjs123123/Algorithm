@@ -5,69 +5,91 @@ import java.io.*;
 // The main method must be in a class named "Main".
 class Main {
     static int N, M;
+    static boolean[] visited;
+    static boolean flg;
     static ArrayList<Edge>[] graph;
-    static int start, end;
-    static class Edge implements Comparable<Edge> {
+    static int start_node, end_node;
+    static class Edge {
         int to, dist;
 
         Edge(int to, int dist) {
             this.to = to;
             this.dist = dist;
         }
+    }
+    static class FastScanner {
+        StringTokenizer st;
+        BufferedReader br;
 
-        @Override
-        public int compareTo(Edge edge) {
-            return Integer.compare(edge.dist, this.dist);
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        int nextInt() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return Integer.parseInt(st.nextToken());
         }
     }
     
-    public static void main(String[] args) throws IOException{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+    public static void main(String[] args) throws IOException {
+        FastScanner fs = new FastScanner();
 
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
+        N = fs.nextInt();
+        M = fs.nextInt();
 
         graph = new ArrayList[N + 1];
-        for (int i = 0; i < N + 1; i++) graph[i] = new ArrayList<>();
+        for (int row = 0; row <= N; row++) graph[row] = new ArrayList<>();
 
+        int max_weight = 0; int min_weight = Integer.MAX_VALUE;
         for (int row = 0; row < M; row++) {
-            st = new StringTokenizer(br.readLine());
+            int A = fs.nextInt();
+            int B = fs.nextInt(); 
+            int C = fs.nextInt();
 
-            int from = Integer.parseInt(st.nextToken());
-            int to = Integer.parseInt(st.nextToken());
-            int dist = Integer.parseInt(st.nextToken());
+            graph[A].add(new Edge(B, C));
+            graph[B].add(new Edge(A, C));
 
-            graph[from].add(new Edge(to, dist));
-            graph[to].add(new Edge(from, dist));
+            max_weight = Math.max(max_weight, C);
+            min_weight = Math.min(min_weight, C);
         }
 
-        st = new StringTokenizer(br.readLine());
-        int start = Integer.parseInt(st.nextToken());
-        int end = Integer.parseInt(st.nextToken());
+        start_node = fs.nextInt();
+        end_node = fs.nextInt();
+        int start = min_weight;
+        int end = max_weight;
 
-        int[] visited = new int[N + 1];
-        PriorityQueue<Edge> pq = new PriorityQueue<>();
+        while (start <= end) {
+            int mid = (start + end) / 2;
+            flg = false;
+            visited = new boolean[N + 1];
+            visited[start_node] = true;
 
-        visited[start] = 0;
-        pq.add(new Edge(start, Integer.MAX_VALUE));
+            dfs(start_node, mid);
 
-        while (!pq.isEmpty()) {
-            Edge cur_edge = pq.poll();
-
-            if (cur_edge.to == end) {
-                System.out.println(cur_edge.dist);
-                return;
+            if (flg) {
+                start = mid + 1;
+            } else {
+                end = mid - 1;
             }
             
-            ArrayList<Edge> list = graph[cur_edge.to];
-            for (Edge new_edge : list) {
-                int new_dist = Math.min(cur_edge.dist, new_edge.dist);
+        }
 
-                if (visited[new_edge.to] >= new_dist) continue;
-                pq.add(new Edge(new_edge.to, new_dist));
-                visited[new_edge.to] = new_dist;
-            }
+        System.out.println(end);
+    }
+
+    static void dfs(int node, int target) {
+        if (node == end_node) {
+            flg = true;
+            return;
+        }
+
+        ArrayList<Edge> list = graph[node];
+        for (Edge edge: list) {
+            if (edge.dist < target) continue;
+            if (visited[edge.to]) continue;
+            
+            visited[edge.to] = true;
+            dfs(edge.to, target);
         }
     }
 }
