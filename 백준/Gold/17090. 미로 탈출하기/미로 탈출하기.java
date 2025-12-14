@@ -7,84 +7,78 @@ class Main {
     static int N, M;
     static char[][] graph;
     static int[][] dp;
+    static boolean[][] visited;
+    static class FastScanner {
+        StringTokenizer st;
+        BufferedReader br;
+
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        int nextInt() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return Integer.parseInt(st.nextToken());
+        }
+
+        String next() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return st.nextToken();
+        }
+    }
     
     public static void main(String[] args) throws IOException{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+        FastScanner fs = new FastScanner();
+        N = fs.nextInt(); 
+        M = fs.nextInt();
 
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
         graph = new char[N][M];
-        dp = new int[N][M];
-        
         for (int row = 0; row < N; row++) {
-            st = new StringTokenizer(br.readLine());
-            String str = st.nextToken();
-            
+            String str = fs.next();
+
             for (int col = 0; col < M; col++) graph[row][col] = str.charAt(col);
         }
-
-        for (int row = 0; row < N; row++) {
-            for (int col = 0; col < M; col++) {
-                dp[row][col] = -1;
-            }
-        }
-
-        for (int row = 0; row < N; row++) {
-            for (int col = 0; col < M; col++) {
-                if (dp[row][col] != -1) continue;
-                
-                Stack<int[]> stack = new Stack<>();
-                
-                int cur_row = row;
-                int cur_col = col;
-                int answer = 2;
-                
-                while (true) {
-                    // 밖으로
-                    if (cur_row < 0 || cur_row == N || cur_col < 0 || cur_col == M) {
-                        answer = 1;
-                        break;
-                    } 
-                    
-                    stack.push(new int[] {cur_row, cur_col});
-                    
-                    if (dp[cur_row][cur_col] == 1) {
-                        answer = 1;
-                        break;
-                    } else if (dp[cur_row][cur_col] == 2 || dp[cur_row][cur_col] == 0) {
-                        answer = 0;
-                        break;
-                    }
-
-                    dp[cur_row][cur_col] = 2;  
-                    
-                    if (graph[cur_row][cur_col] == 'U') cur_row--;
-                    else if(graph[cur_row][cur_col] == 'D') cur_row++;
-                    else if(graph[cur_row][cur_col] == 'R') cur_col++;
-                    else cur_col--;
-                    
-                        
-                }
-
-                while (!stack.isEmpty()) {
-                    int[] cur_arr = stack.pop();
-
-                    dp[cur_arr[0]][cur_arr[1]] = answer;
-                }
-
-                
-            }
-        }
         
-        int result = 0;
-
+        dp = new int[N][M];
         for (int row = 0; row < N; row++) {
-            for (int col = 0; col < M; col++) result += dp[row][col];
+            for (int col = 0; col < M; col++) dp[row][col] = -1;
+        }
+        visited = new boolean[N][M];
+
+        int answer = 0;
+        for (int row = 0; row < N; row++) {
+            for (int col = 0; col < M; col++) {
+                visited[row][col] = true;
+
+                int result = dfs(row, col);
+                if (result != -1) answer += result;
+                visited[row][col] = false;
+            }
         }
 
-        StringBuilder sb = new StringBuilder();
+        System.out.println(answer);
+    }
 
-        System.out.println(result);
+    static int dfs(int row, int col) {
+        if (dp[row][col] != -1) return dp[row][col];
+
+        int result = 1;
+        int new_row = row;
+        int new_col = col;
+        
+        if (graph[row][col] == 'U') new_row--;
+        else if (graph[row][col] == 'D') new_row++;
+        else if (graph[row][col] == 'L') new_col--;
+        else new_col++;
+
+        if (new_row < 0 || new_row >= N || new_col < 0 || new_col >= M)  return 1;
+        if (visited[new_row][new_col]) return 0;
+        
+        visited[new_row][new_col] = true;
+        result *= dfs(new_row, new_col);
+        visited[new_row][new_col] = false;
+
+        dp[row][col] = result;
+        return result;
     }
 }
