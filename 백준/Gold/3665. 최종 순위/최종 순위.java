@@ -4,103 +4,116 @@ import java.io.*;
 
 // The main method must be in a class named "Main".
 class Main {
-    public static void main(String[] args) throws IOException{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+    static class FastScanner {
+        StringTokenizer st;
+        BufferedReader br;
 
-        int T = Integer.parseInt(st.nextToken());
-        StringBuilder sb = new StringBuilder();
-        
-        for (int t = 0; t < T; t++) {
-            st = new StringTokenizer(br.readLine());
-            int n = Integer.parseInt(st.nextToken());
-
-            st = new StringTokenizer(br.readLine());
-            int[] arr = new int[n + 1];
-            int[] degree = new int[n + 1];
-            int[] idxArr = new int[n + 1];
-            boolean[] visited = new boolean[n + 1];
-            ArrayList<Integer>[] graph = new ArrayList[n + 1];
-            for (int i = 1; i <= n; i++) {
-                arr[i] = Integer.parseInt(st.nextToken());
-                degree[ arr[i] ] = i-1;
-                graph[i] = new ArrayList<>();
-                idxArr[arr[i]] = i;
-                
-            }
-
-            for (int i = 1; i <= n; i++) {
-                
-                for (int j = i + 1; j <= n; j++) graph[ arr[i] ].add(arr[j]);
-            }
-
-
-            st = new StringTokenizer(br.readLine());
-            int m = Integer.parseInt(st.nextToken());
-
-            for (int i = 0; i < m; i++) {
-                st = new StringTokenizer(br.readLine());
-
-                int start = Integer.parseInt(st.nextToken());
-                int to = Integer.parseInt(st.nextToken());
-
-
-                if (idxArr[start] > idxArr[to]) {
-                    degree[to]++;
-                    degree[start]--;
-                    graph[start].add(to);
-                    graph[to].remove((Integer)start);
-                } else {
-                    degree[to]--;
-                    degree[start]++; 
-                    graph[to].add(start);
-                    graph[start].remove((Integer)to);
-                }
-                
-            }
-
-            Deque<Integer> deque = new ArrayDeque<>();
-            for (int i = 1; i <= n; i++) {
-                if (degree[i] == 0) {
-                    deque.add(i);
-                    visited[i] = true;
-                }
-            }
-
-            StringBuilder sbb = new StringBuilder();
-            int cnt = 0;
-
-            
-            while (!deque.isEmpty()) {
-                if (deque.size() >= 2) {
-                    sb.append("?").append("\n");
-                    break;
-                }
-
-                int idx = deque.pollFirst();
-                ArrayList<Integer> list = graph[idx];
-                sbb.append(idx).append(" ");
-
-                
-                
-                for (int num : list) {
-                    degree[num]--;
-
-                    if (degree[num] == 0) {
-                        if (visited[num]) continue;
-
-                        visited[num] = true;
-                        deque.add(num);
-                    }
-                }
-
-                cnt++;
-            }
-
-            if (cnt == n) sb.append(sbb.toString()).append("\n");
-            else sb.append("IMPOSSIBLE").append("\n");
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
         }
 
+        int nextInt() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return Integer.parseInt(st.nextToken());
+        }
+    }
+    
+    public static void main(String[] args) throws IOException{
+        FastScanner fs = new FastScanner();
+
+        int tc = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < tc; i++) {
+            int n = fs.nextInt();
+            boolean[][] graph = new boolean[n + 1][n + 1];
+
+            int[] scoreArr = new int[n + 1];
+            int[] arr = new int[n + 1];
+            
+            for (int j = 1; j <= n; j++) {
+                int num = fs.nextInt();
+                scoreArr[ num ] = j;
+                arr[j] = num;
+            }
+
+            for (int from = 1; from <= n; from++) {
+                for (int to = from + 1; to <= n; to++) {
+                    graph[ arr[from] ][ arr[to] ] = true;
+                }
+            }
+            
+            int[] counts = new int[n + 1];
+            for (int j = 1; j <= n; j++) counts[ arr[j] ] = j - 1; 
+
+            // System.out.println(Arrays.toString(arr));
+            // System.out.println(Arrays.toString(counts));
+            // System.out.println(Arrays.toString(scoreArr));
+            
+            int m = fs.nextInt();
+            for (int j = 0; j < m; j++) {
+                int a = fs.nextInt();
+                int b = fs.nextInt();
+
+                if (scoreArr[a] > scoreArr[b]) {
+                    // a가 b보다 먼저 올 때,
+                    counts[a]--;
+                    counts[b]++;
+
+                    // graph[b][a] = true;
+                    // graph[a][b] = false;
+                    
+                    graph[b][a] = false;
+                    graph[a][b] = true;
+                } else {
+                    counts[a]++;
+                    counts[b]--;
+
+                    // graph[b][a] = false;
+                    // graph[a][b] = true;
+                    
+                    graph[b][a] = true;
+                    graph[a][b] = false;
+                }
+
+            }
+
+
+            StringBuilder sbb = new StringBuilder();
+            Deque<Integer> deque = new ArrayDeque<>();
+            Deque<Integer> answer = new ArrayDeque<>();
+            
+            for (int j = 1; j <= n; j++) {
+                if (counts[j] == 0) {
+                    deque.add(j);
+                    answer.add(j);
+                }
+            }
+
+            while (!deque.isEmpty()) {
+                int no = deque.pollFirst();
+
+                for (int j = 1; j <= n; j++) {
+                    if (graph[no][j]) {
+                        counts[j]--;
+
+                        if (counts[j] == 0) {
+                            deque.add(j);
+                            answer.add(j);
+                        }
+                    }
+                }
+            }
+
+        
+            if (answer.size() != n) sb.append("IMPOSSIBLE");
+            else {
+                for (int no : answer) {
+                    sbb.append(no).append(" ");
+                }
+                sb.append(sbb.toString());
+            }
+            sb.append("\n");
+        }
         System.out.println(sb.toString());
     }
 }
