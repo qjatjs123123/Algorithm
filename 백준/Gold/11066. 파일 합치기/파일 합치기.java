@@ -1,64 +1,86 @@
-import java.io.*;
 import java.util.*;
+import java.lang.*;
+import java.io.*;
 
-public class Main {
-	static int T;
-	static int K;
-	static int[][] memo;
-	static int[] prefix;
-	static int[] arr;
-	public static void main(String[] args) throws IOException {		
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-//		BufferedReader br = new BufferedReader(new FileReader("./input.txt"));
-		StringTokenizer st = new StringTokenizer(br.readLine());
-		
-		T = Integer.parseInt(st.nextToken());
-		for (int t = 0; t < T; t++) {
-			st = new StringTokenizer(br.readLine());
-			K = Integer.parseInt(st.nextToken());
-			
-			st = new StringTokenizer(br.readLine());
-			arr = new int[K];
-			for (int row = 0; row < K; row++) arr[row] = Integer.parseInt(st.nextToken());
-			memo = new int[K][K];
-			prefix = new int[K];
-			
-			for (int row = 0; row < K; row++) {
-				for(int col = 0; col < K; col++) {
-					for (int z = 0; z < K; z++) {
-						memo[row][col] = -1;
-					}
-				}
-			}
-			prefix[0] = arr[0];
-			for (int i = 1; i < K; i++) prefix[i] = arr[i] + prefix[i - 1];
-			
+// The main method must be in a class named "Main".
+class Main {
+    static int K;
+    static int[] file, prefix;
+    static int[][] dp;
+    
+    static class FastScanner {
+        BufferedReader br;
+        StringTokenizer st;
+        
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
 
-			System.out.println(dp(0, K - 1));
+        String next() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return st.nextToken();
+        }
 
-		}
-		
-	}
-	
-	static int dp(int start, int end) {
-		if (start == end) return 0;
-        if (memo[start][end] != -1) return memo[start][end];
-		if (end - start == 1) {
-			memo[start][end] = arr[end] + arr[start];
-			
-			return arr[end] + arr[start];
-		}
-		int sum = 0;
-		if (start == 0) sum = prefix[end];
-		else sum = prefix[end] - prefix[start-1];
-		
-		int total = Integer.MAX_VALUE;
-		for (int mid = start; mid < end; mid++) {
-			total = Math.min(total, dp(start, mid) + dp(mid + 1, end) + sum);
-		}
+        int nextInt() throws IOException {
+            return Integer.parseInt(next());
+        }
+    }
+    
+    public static void main(String[] args) throws IOException{
+        FastScanner fs = new FastScanner();
 
-		memo[start][end] = total;
-		return total;
-	}
+        int T = fs.nextInt();
+        StringBuilder sb = new StringBuilder();
+        for (int t = 0; t < T; t++) {
+            K = fs.nextInt();
+            file = new int[K];
+            prefix = new int[K + 1];
+            dp = new int[K][K];
+            
+            for (int i = 0; i < K; i++) {
+                file[i] = fs.nextInt();
+
+                if (i == 0) {
+                    prefix[i + 1] = file[i];
+                } else {
+                    prefix[i + 1] = file[i] + prefix[i];
+                }
+            }
+
+            for (int row = 0; row < K; row++) {
+                for (int col = 0; col < K; col++) {
+                    if (row == col) {
+                        dp[row][col] = 0;
+                        continue;
+                    }
+                    dp[row][col] = 999_999_999;
+                }
+            }
+            
+            for (int cnt = 1; cnt < K; cnt++) {
+                for (int left = 0; left < K; left++) {
+                    int right = left + cnt;
+
+                    if (right >= K) break;
+                    
+                    if (cnt == 1) {
+                        dp[left][right] = file[left] + file[right];
+                    } else {
+                        for (int tmp = left; tmp < right; tmp++) {
+                            dp[left][right] = Math.min(
+                                dp[left][right],
+                                prefix[right + 1] - prefix[left] + dp[left][tmp] + dp[tmp + 1][right]
+                            );
+                        }
+                    }
+                    
+                }
+            }
+
+            sb.append(dp[0][K - 1]).append("\n");
+        }   
+
+        System.out.println(sb.toString());
+    }
 
 }
