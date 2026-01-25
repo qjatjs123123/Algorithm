@@ -6,7 +6,6 @@ import java.io.*;
 class Main {
     static int N, M, A, B, C;
     static ArrayList<Edge>[] graph;
-    static int[] distance;
     static int[] dp;
     static class Edge {
         int from, to, dist;
@@ -37,14 +36,14 @@ class Main {
 
         N = fs.nextInt(); M = fs.nextInt(); A = fs.nextInt(); B = fs.nextInt(); C = fs.nextInt();
         graph = new ArrayList[N + 1];
-        distance = new int[N + 1];
         dp = new int[N + 1];
         for (int i = 0; i <= N; i++) {
             graph[i] = new ArrayList<>();
-            distance[i] = Integer.MAX_VALUE;
         }
         
-        
+        int left = Integer.MAX_VALUE;
+        int right = Integer.MIN_VALUE;
+        int max_num = Integer.MIN_VALUE;
         for (int i = 0; i < M; i++) {
             int from = fs.nextInt();
             int to = fs.nextInt();
@@ -52,45 +51,53 @@ class Main {
 
             graph[from].add(new Edge(from, to, dist));
             graph[to].add(new Edge(to, from, dist));
+
+            left = Math.min(left, dist);
+            right = Math.max(right, dist);
+            max_num = Math.max(right, dist);
         }
 
-        int result = dijkstra();
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            
+            boolean flg = dijkstra(mid);
+            
+            if (flg) right = mid - 1;
+            else left = mid + 1;
+        }
 
-        if (result == Integer.MAX_VALUE) System.out.println(-1);
-        else System.out.println(result);
-        
-    }
+        if (left > max_num) System.out.println(-1);
+        else System.out.println(left);
+    } 
 
-    static int dijkstra() {
+    static boolean dijkstra(int mid) {
+        int[] distance = new int[N + 1];
+        for (int i = 0; i <= N; i++) distance[i] = Integer.MAX_VALUE;
         distance[A] = 0;
 
         PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
-        pq.add(new int[] {0, A, 0});
-        int answer = Integer.MAX_VALUE;
-        
+        pq.add(new int[] {0, A});
+
         while (!pq.isEmpty()) {
             int[] cur_arr = pq.poll();
             int cur_dist = cur_arr[0];
             int cur_no = cur_arr[1];
-            int cur_max = cur_arr[2];
             
             if (distance[cur_no] < cur_dist) continue;
             
             ArrayList<Edge> list = graph[cur_no];
             for (Edge edge : list) {
                 int new_dist = cur_dist + edge.dist;
-                int new_max = Math.max(cur_max, edge.dist);
-                if (edge.to == B && new_dist <= C) {
-                    answer = Math.min(answer, new_max);
-                }
+
+                if (edge.dist > mid) continue;
                 if (distance[edge.to] <= new_dist) continue;
-                
-                
+                  
                 distance[edge.to] = new_dist;
-                pq.add(new int[] {new_dist, edge.to, new_max});
+                pq.add(new int[] {new_dist, edge.to});
             }
         }
 
-        return answer;
+        if (distance[B] <= C) return true;
+        return false;
     }
 }
