@@ -80,11 +80,11 @@ class Main {
             for (Edge edge : list) {
                 int new_dist = cur_dist + edge.dist;
                 int new_max = Math.max(cur_max, edge.dist);
-                
-                if (distance[edge.to] <= new_dist) continue;
                 if (edge.to == B && new_dist <= C) {
                     answer = Math.min(answer, new_max);
                 }
+                if (distance[edge.to] <= new_dist) continue;
+                
                 
                 distance[edge.to] = new_dist;
                 pq.add(new int[] {new_dist, edge.to, new_max});
