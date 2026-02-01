@@ -4,79 +4,81 @@ import java.io.*;
 
 // The main method must be in a class named "Main".
 class Main {
-    static int N;
-    static Node[] nodeArr;
-    static int answer = 0;
-    static int[] childCountArr; 
-    static class Node {
+    static class FastScanner {
+        StringTokenizer st;
+        BufferedReader br;
+
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        int nextInt() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return Integer.parseInt(st.nextToken());
+        }
+    }
+
+    static class Node{
         int no;
-        ArrayList<Integer> child = new ArrayList<>();
+        ArrayList<Node> childList = new ArrayList<>();
 
         Node(int no) {
             this.no = no;
         }
     }
     
-    static class FastScanner {
-        BufferedReader br;
-        StringTokenizer st;
-
-        FastScanner() {
-            br = new BufferedReader(new InputStreamReader(System.in));
-        }
-
-        String next() throws IOException {
-            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
-            return st.nextToken();
-        }
-
-        int nextInt() throws IOException {
-            return Integer.parseInt(next());
-        }
-    }
+    static int N;
+    static Node[] nodeArr;
+    static int answer = 0;
+    static int[] dp;
     
     public static void main(String[] args) throws IOException{
         FastScanner fs = new FastScanner();
-        N = fs.nextInt();
 
-        childCountArr = new int[N];
+        N = fs.nextInt();
         nodeArr = new Node[N];
+        dp = new int[N];
+        
         for (int i = 0; i < N; i++) {
             nodeArr[i] = new Node(i);
+            dp[i] = -1;
         }
-
-        for (int no = 0; no < N; no++) {
+        
+        for (int i = 0; i < N; i++) {
             int parent = fs.nextInt();
 
-            if (parent == -1) continue;
-            nodeArr[parent].child.add(no);
+            if (parent != -1) {
+                nodeArr[parent].childList.add(nodeArr[i]);
+            }
         }
-
-      
 
         System.out.println(dfs(0));
     }
 
-    static int dfs(int no) {
-        ArrayList<Integer> child = nodeArr[no].child;
-        if (child.size() == 0) {
+    static int dfs(int cur_no) {
+        Node cur_node = nodeArr[cur_no];
+
+        if (dp[cur_no] != -1) return dp[cur_no];
+        if (cur_node.childList.size() == 0) {
             return 0;
         }
 
-        ArrayList<Integer> list = new ArrayList<>();
+        int result = 0;
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
 
-        for (int child_no : child) {
-            list.add(dfs(child_no));
+        for (Node new_node : cur_node.childList) {
+            pq.add( dfs(new_node.no) * -1 );
         }
 
-        Collections.sort(list, Collections.reverseOrder());
+        int depth = 1;
+        while (!pq.isEmpty()) {
+            int cur_max = pq.poll() * -1;
 
-        int maxTime = 0;
-        for (int i = 0; i < list.size(); i++) {
-            maxTime = Math.max(maxTime, list.get(i) + i + 1);
+            result = Math.max(result, cur_max + depth);
+            depth++;
         }
-        
-        return maxTime;
+
+        dp[cur_no] = result;
+        return result;
     }
-    
 }
