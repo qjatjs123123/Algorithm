@@ -4,71 +4,91 @@ import java.io.*;
 
 // The main method must be in a class named "Main".
 class Main {
-    static int N, M;
-    static int s, e;
-    static int[] dp;
-    static ArrayList<Edge>[] graph;
-    static class Edge {
-        int to;
-        int dist;
+    static class FastScanner {
+        StringTokenizer st;
+        BufferedReader br;
+
+        FastScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        int nextInt() throws IOException {
+            while (st == null || !st.hasMoreTokens()) st = new StringTokenizer(br.readLine());
+            return Integer.parseInt(st.nextToken());
+        }
+    }
+    
+    static class Edge{
+        int to, dist;
 
         Edge(int to, int dist) {
             this.to = to;
             this.dist = dist;
         }
     }
-    
+
+    static ArrayList<Edge>[] graph;
+    static int N, M;
+    static int S, E;
     public static void main(String[] args) throws IOException{
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-
-        st = new StringTokenizer(br.readLine());
-        s = Integer.parseInt(st.nextToken());
-        e = Integer.parseInt(st.nextToken());
-
-        dp = new int[N + 1];
-        graph = new ArrayList[N + 1];
-
-        for (int i = 0; i <= N; i++) graph[i] = new ArrayList<>();
+        FastScanner fs = new FastScanner();
+        N = fs.nextInt();
+        M = fs.nextInt();
+        S = fs.nextInt();
+        E = fs.nextInt();
+        int left = Integer.MAX_VALUE;
+        int right = 0;
         
-        for (int i = 0; i < M; i++) {
-            st = new StringTokenizer(br.readLine());
+        graph = new ArrayList[N + 1];
+        for (int i = 0; i <= N; i++) graph[i] = new ArrayList<>();
 
-            int from = Integer.parseInt(st.nextToken());
-            int to = Integer.parseInt(st.nextToken());
-            int dist = Integer.parseInt(st.nextToken());
+        for (int i = 0; i < M; i++) {
+            int from = fs.nextInt();
+            int to = fs.nextInt();
+            int dist = fs.nextInt();
 
             graph[from].add(new Edge(to, dist));
             graph[to].add(new Edge(from, dist));
+
+            left = Math.min(left, dist);
+            right = Math.max(right, dist);
         }
 
-        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> Integer.compare(b[0], a[0]));
-        pq.add(new int[] {Integer.MAX_VALUE, s});
-        dp[s] = Integer.MAX_VALUE;
-        while (!pq.isEmpty()) {
-            int[] cur_arr = pq.poll();
-            int cur_dist = cur_arr[0];
-            int from = cur_arr[1];
+        while (left <= right) {
+            int mid = (left + right) / 2;
 
-            if (from == e) {
-                System.out.println(cur_dist);
-                return;
+            boolean result = bfs(mid);
+            if (result) left = mid + 1;
+            else right = mid - 1;
+            
+        }
+
+        System.out.println(right);
+    }
+
+    static boolean bfs(int mid) {
+        boolean[] visited = new boolean[N + 1];
+
+        ArrayDeque<Integer> deque = new ArrayDeque<>();
+        deque.add(S);
+        visited[S] = true;
+        
+        while (!deque.isEmpty()) {
+            int no = deque.pollFirst();
+
+            if (no == E) return true;
+            
+            ArrayList<Edge> list = graph[no];
+            for (Edge edge: list) {
+                if (visited[edge.to]) continue;
+                if (edge.dist < mid) continue;
+
+                deque.add(edge.to);
+                visited[edge.to] = true;
             }
             
-            ArrayList<Edge> edgeList = graph[from];
-            for (Edge edge : edgeList) {
-                int new_dist = Math.min(edge.dist, cur_dist);
-
-                if (dp[edge.to] >= new_dist) continue;
-
-                dp[edge.to] = new_dist;
-                pq.add(new int[] {new_dist, edge.to});
-            }
         }
 
-        System.out.println(0);
+        return false;
     }
 }
