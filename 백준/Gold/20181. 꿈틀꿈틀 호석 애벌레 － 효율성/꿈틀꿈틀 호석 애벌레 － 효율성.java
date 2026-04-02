@@ -6,7 +6,7 @@ import java.io.*;
 class Main {
     static int N, K;
     static int[] graph;
-    static int[] dp;
+    static long[] dp;
     static class FastScanner {
         BufferedReader br;
         StringTokenizer st;
@@ -25,7 +25,7 @@ class Main {
         FastScanner fs = new FastScanner();
         N = fs.nextInt(); K = fs.nextInt();
         graph = new int[N];
-        dp = new int[N];
+        dp = new long[N];
 
         for (int i = 0; i < N; i++) {
             graph[i] = fs.nextInt();
@@ -35,13 +35,13 @@ class Main {
         System.out.println(dfs(0));
     }
 
-    static int dfs(int idx) {
+    static long dfs(int idx) {
         if (idx >= N) return 0;
         if (dp[idx] != -1) return dp[idx];
         
 
-        int answer = 0;
-        int tmp =0;
+        long answer = 0;
+        long tmp = 0;
         for (int i = idx; i < N; i++) {
             tmp += graph[i];
             if (tmp >= K)  {
